@@ -1192,6 +1192,104 @@
     opacity: 0.55;
   }
 
+  /* ---- Variants, swaps, effort card, phase selector ---- */
+  .variant-row { margin: 8px 0 2px; }
+  .variant-select {
+    width: 100%;
+    background: var(--bg-elev);
+    color: var(--text);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: inherit;
+    -webkit-appearance: none;
+    appearance: none;
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2012%208'%3E%3Cpath%20fill='%23888'%20d='M1%201l5%205%205-5'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px;
+  }
+  .sub-chip {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.1em;
+    color: #1a1100;
+    background: var(--accent);
+    border-radius: 5px;
+    padding: 2px 6px;
+    vertical-align: middle;
+    margin-left: 6px;
+  }
+  .swap-toggle {
+    display: block;
+    width: 100%;
+    background: none;
+    border: 1px dashed var(--border-strong);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 9px;
+    margin-top: 12px;
+    cursor: pointer;
+  }
+  .swap-row { margin-top: 8px; }
+  .swap-active {
+    margin-top: 12px;
+    font-size: 12px;
+    color: var(--accent);
+    background: rgba(245,158,11,0.08);
+    border: 1px solid rgba(245,158,11,0.35);
+    border-radius: 10px;
+    padding: 9px 12px;
+  }
+  .swap-clear-link {
+    background: none; border: none; color: var(--accent);
+    text-decoration: underline; font-size: 12px; cursor: pointer; padding: 0;
+  }
+  .effort-row {
+    padding: 10px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .effort-row:last-of-type { border-bottom: none; }
+  .effort-name { font-weight: 600; font-size: 14px; }
+  .effort-stats { display: flex; gap: 10px; align-items: center; margin-top: 5px; }
+  .rir-chip {
+    font-size: 11px; font-weight: 700; border-radius: 6px; padding: 2px 8px;
+    background: var(--bg-elev); color: var(--text-muted);
+  }
+  .rir-chip.rir-good { background: rgba(52,211,153,0.15); color: #34d399; }
+  .rir-chip.rir-mid  { background: rgba(251,191,36,0.15); color: #fbbf24; }
+  .rir-chip.rir-low  { background: rgba(248,113,113,0.15); color: #f87171; }
+  .trend { font-size: 12px; font-weight: 700; }
+  .trend-up { color: #34d399; }
+  .trend-flat { color: var(--text-muted); }
+  .trend-down { color: #f87171; }
+  .effort-flag {
+    margin-top: 6px; font-size: 11.5px; font-weight: 600; color: #f87171;
+    background: rgba(248,113,113,0.08); border-radius: 8px; padding: 6px 10px;
+  }
+  .effort-flag.effort-ok { color: #34d399; background: rgba(52,211,153,0.08); }
+  .phase-row { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+  .phase-btn {
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong);
+    border-radius: 10px;
+    color: var(--text-muted);
+    font-size: 13px;
+    font-weight: 700;
+    padding: 11px 4px;
+    cursor: pointer;
+  }
+  .phase-btn.active {
+    background: rgba(245,158,11,0.12);
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
   /* ---- All-time total volume banner ---- */
   .vol-banner {
     border-radius: 16px;
@@ -1635,7 +1733,9 @@ function defaultState() {
     bodyweight: [],       // [{date, weight}]
     runs: [],             // [{date, type, distance, time, notes}]
     legAlternator: "squat", // deprecated — squat & hex DL now both run every leg day
-    dailyCheckins: []     // [{date, hrv, steps, bodyBattery, sleepScore, hydration, notes}]
+    dailyCheckins: [],    // [{date, hrv, steps, bodyBattery, sleepScore, hydration, notes}]
+    phase: "maintenance", // cutting | maintenance | bulking — adjusts stall expectations
+    garminWeeks: []       // [{weekStart:"YYYY-MM-DD" (Monday), miles}] watch-tracked mileage
   };
 }
 
@@ -1806,8 +1906,8 @@ function workoutPercentiles(w) {
   const out = [];
   const seen = new Set();
   w.exercises.forEach(ex => {
-    const map = STD_MAP[ex.name];
-    if (!map || seen.has(ex.name)) return;
+    const map = STD_MAP[effectiveName(ex)];
+    if (!map || seen.has(effectiveName(ex))) return;
     const logged = ex.sets.filter(s => s.logged);
     if (!logged.length) return;
     let bestE1 = 0;
@@ -1817,8 +1917,8 @@ function workoutPercentiles(w) {
     });
     const pc = strengthPercentile(bestE1, map.std);
     if (!pc) return;
-    seen.add(ex.name);
-    out.push({ name: ex.name, stdLabel: STRENGTH_STD[map.std].label, e1: bestE1, ...pc });
+    seen.add(effectiveName(ex));
+    out.push({ name: effectiveName(ex), stdLabel: STRENGTH_STD[map.std].label, e1: bestE1, ...pc });
   });
   return out;
 }
@@ -1861,7 +1961,7 @@ function bestE1ForNames(names) {
   let best = 0;
   state.workouts.forEach(w => {
     w.exercises.forEach(ex => {
-      if (!names.includes(ex.name)) return;
+      if (!names.includes(effectiveName(ex))) return;
       ex.sets.filter(s => s.logged).forEach(s => {
         const e = est1RM(s.weight, s.reps);
         if (e > best) best = e;
@@ -1910,6 +2010,76 @@ function rankCardsData() {
     { name: "VO₂ Max", value: v ? String(v) : null, unit: "ml/kg",
       topPct: vpc ? vpc.topPct : null, pctLabel: vpc ? vpc.label : null, pop: "all men & women" }
   ];
+}
+
+// ============================================================================
+// TRAINING EFFORT CHECK — per-compound avg RIR + progress over recent sessions.
+// Flags "grinding without progress" (3+ sessions at ~failure, no e1RM gain).
+// Phase-aware: during a cut, holding steady is on-track, not a stall.
+// ============================================================================
+function compoundNames() {
+  const out = [];
+  for (const k in PLAN) PLAN[k].exercises.forEach(d => {
+    if (d.isCompound && !d.optional && !out.includes(d.name)) out.push(d.name);
+  });
+  return out;
+}
+
+function effortCheckData() {
+  return compoundNames().map(name => {
+    const sess = [];
+    for (let i = state.workouts.length - 1; i >= 0 && sess.length < 4; i--) {
+      const ex = state.workouts[i].exercises.find(e => effectiveName(e) === name);
+      if (!ex) continue;
+      const sets = ex.sets.filter(s => s.logged && s.weight && s.reps);
+      if (!sets.length) continue;
+      const rirs = sets.filter(s => s.rir != null).map(s => s.rir);
+      sess.unshift({
+        avgRir: rirs.length ? rirs.reduce((a, b) => a + b, 0) / rirs.length : null,
+        bestE1: Math.max(...sets.map(s => est1RM(s.weight, s.reps)))
+      });
+    }
+    if (sess.length < 2) return null;
+    const rirVals = sess.filter(s => s.avgRir != null).map(s => s.avgRir);
+    const avgRir = rirVals.length ? rirVals.reduce((a, b) => a + b, 0) / rirVals.length : null;
+    const first = sess[0].bestE1, latest = sess[sess.length - 1].bestE1;
+    const delta = first ? (latest - first) / first * 100 : 0;
+    const grinding = sess.length >= 3 && rirVals.length >= 3 &&
+      rirVals.slice(-3).every(r => r <= 0.7) && delta <= 1;
+    return { name, avgRir, delta, grinding, n: sess.length };
+  }).filter(Boolean);
+}
+
+function renderEffortCard() {
+  const rows = effortCheckData();
+  if (!rows.length) return "";
+  const cutting = state.phase === "cutting";
+  return `
+    <div class="card">
+      <div class="card-title">Training Effort <span style="color: var(--text-dim); letter-spacing: 0; text-transform: none; font-weight: 500;">· avg RIR & e1RM trend</span></div>
+      ${rows.map(r => {
+        const rirCls = r.avgRir == null ? '' : (r.avgRir >= 1.5 ? 'rir-good' : (r.avgRir >= 0.8 ? 'rir-mid' : 'rir-low'));
+        const arrow = r.delta > 1 ? '↑' : (r.delta < -1 ? '↓' : '→');
+        const arrowCls = r.delta > 1 ? 'trend-up' : (r.delta < -1 ? 'trend-down' : 'trend-flat');
+        let flag = '';
+        if (r.grinding) {
+          flag = cutting && r.delta > -3
+            ? `<div class="effort-flag effort-ok">≈ Holding through the cut — on track</div>`
+            : `<div class="effort-flag">⚠ 3+ sessions near failure without progress — try RIR 1–2 and rebuild</div>`;
+        }
+        return `
+        <div class="effort-row">
+          <div class="effort-name">${r.name}</div>
+          <div class="effort-stats mono">
+            <span class="rir-chip ${rirCls}">${r.avgRir != null ? 'RIR ' + r.avgRir.toFixed(1) : '—'}</span>
+            <span class="trend ${arrowCls}">${arrow} ${r.delta >= 0 ? '+' : ''}${r.delta.toFixed(1)}%</span>
+          </div>
+          ${flag}
+        </div>`;
+      }).join("")}
+      <div class="small" style="margin-top: 8px; color: var(--text-dim);">Trend = best e1RM now vs ~4 sessions ago${cutting ? ' · cut mode: holding steady counts as winning' : ''}.</div>
+    </div>
+  `;
 }
 
 function renderRankGrid() {
@@ -2072,11 +2242,54 @@ function renderBodyMap() {
   `;
 }
 
-function findLastForExercise(dayKey, exerciseName) {
+// ============================================================================
+// EXERCISE VARIANTS & SUBSTITUTIONS
+// Ambiguous lifts get an implement/equipment selector; each variant keeps its
+// own Last/Best/progression history. Legacy sets (no variant) live in the
+// first-listed (default) variant's bucket.
+// ============================================================================
+const VARIANTS = {
+  "Barbell or DB Curl": ["Barbell", "Dumbbells (total)", "Cable"],
+  "Hammer Curl": ["Per DB", "Total (both DBs)"],
+  "Cable Chest Fly": ["Cable (per side)", "Machine / total stack"],
+  "Cable Y-Raise / Reverse Pec Deck": ["Cable Y-Raise", "Reverse Pec Deck"],
+  "Overhead Cable Tricep Ext (rope)": ["Rope", "Bar"],
+  "Preacher Curl": ["Free-weight (EZ/DB)", "Machine", "Cable"],
+  "Seated Calf Raise": ["Plate-loaded", "Machine stack"],
+  "Weighted Pull-Up / Lat Pulldown": ["Lat Pulldown", "Weighted Pull-Up"],
+  "Single-Arm Cable Row (shotgun)": ["Cable", "Machine row"],
+  "Seated Cable Row (close grip)": ["Cable", "Chest-Supported Row"],
+  "Romanian Deadlift": ["Barbell", "Dumbbells"],
+  "Rear Delt Cable Fly": ["Cable", "Machine"]
+};
+
+// The movement actually performed (substitution wins over the plan name).
+function effectiveName(ex) { return ex.subTo || ex.name; }
+
+// Does a historical exercise entry belong to the requested variant bucket?
+function variantMatches(histEx, variant, name) {
+  const opts = VARIANTS[name];
+  if (!opts) return true;
+  const hv = histEx.variant || opts[0];
+  return hv === (variant || opts[0]);
+}
+
+// Most recent variant used for an exercise (so new sessions default to it).
+function lastVariantFor(name) {
+  const opts = VARIANTS[name];
+  if (!opts) return null;
+  for (let i = state.workouts.length - 1; i >= 0; i--) {
+    const ex = state.workouts[i].exercises.find(e => e.name === name && e.variant);
+    if (ex) return ex.variant;
+  }
+  return opts[0];
+}
+
+function findLastForExercise(dayKey, exerciseName, variant) {
   for (let i = state.workouts.length - 1; i >= 0; i--) {
     const w = state.workouts[i];
     if (w.dayKey !== dayKey) continue;
-    const ex = w.exercises.find(e => e.name === exerciseName);
+    const ex = w.exercises.find(e => effectiveName(e) === exerciseName && variantMatches(e, variant, exerciseName));
     if (ex && ex.sets.some(s => s.logged)) return { workout: w, exercise: ex };
   }
   return null;
@@ -2085,12 +2298,12 @@ function findLastForExercise(dayKey, exerciseName) {
 // Best logged set at a specific set position (index) for an exercise, by estimated
 // 1RM, across every day it appears plus the in-progress workout. So set 1's "Best"
 // reflects best-ever first sets, set 2's reflects best-ever second sets, etc.
-function bestSetAtPosition(name, pos) {
+function bestSetAtPosition(name, pos, variant) {
   let best = null, bestE1 = 0;
   const scan = (w) => {
     if (!w || !w.exercises) return;
     w.exercises.forEach(exr => {
-      if (exr.name !== name) return;
+      if (effectiveName(exr) !== name || !variantMatches(exr, variant, name)) return;
       const s = exr.sets[pos];
       if (!s || !s.logged || s.weight == null || s.reps == null) return;
       const e1 = est1RM(s.weight, s.reps);
@@ -2102,8 +2315,8 @@ function bestSetAtPosition(name, pos) {
   return best;
 }
 
-function suggestNext(dayKey, exDef) {
-  const last = findLastForExercise(dayKey, exDef.name);
+function suggestNext(dayKey, exDef, variant) {
+  const last = findLastForExercise(dayKey, exDef.name, variant);
   if (!last) return null;
 
   const loggedSets = last.exercise.sets.filter(s => s.logged && s.weight != null);
@@ -2133,6 +2346,32 @@ function suggestNext(dayKey, exDef) {
   }
 }
 
+// Recent logged weights (last n sessions) for an exercise instance, matched on
+// the movement actually performed + its variant. Used by the unit-sanity guard.
+function recentWeightsFor(ex, n) {
+  const name = effectiveName(ex);
+  const out = [];
+  let sessions = 0;
+  for (let i = state.workouts.length - 1; i >= 0 && sessions < (n || 3); i--) {
+    const hx = state.workouts[i].exercises.find(e => effectiveName(e) === name && variantMatches(e, ex.variant, ex.name));
+    if (!hx) continue;
+    const ws = hx.sets.filter(s => s.logged && s.weight).map(s => s.weight);
+    if (!ws.length) continue;
+    out.push(...ws);
+    sessions++;
+  }
+  return out;
+}
+
+// Local-time Monday (YYYY-MM-DD) of the week containing d — run-week bucketing.
+function mondayIso(d) {
+  const dt = d ? new Date(d) : new Date();
+  dt.setHours(0, 0, 0, 0);
+  dt.setDate(dt.getDate() - ((dt.getDay() + 6) % 7));
+  const p = n => String(n).padStart(2, "0");
+  return `${dt.getFullYear()}-${p(dt.getMonth() + 1)}-${p(dt.getDate())}`;
+}
+
 // ============================================================================
 // WORKOUT FLOW
 // ============================================================================
@@ -2154,6 +2393,8 @@ function startWorkout(dayKey) {
       timestamp: null
     })),
     dropSet: { weight: null, reps: null, rir: null, logged: false },
+    variant: lastVariantFor(def.name),
+    subTo: null,
     notes: ""
   }));
 
@@ -2210,9 +2451,9 @@ function showWorkoutSummary(w) {
   w.exercises.forEach(ex => {
     ex.sets.filter(s => s.logged).forEach(set => {
       const e1 = est1RM(set.weight, set.reps);
-      const prevBest = previousBest1RM(w.dayKey, ex.name, w.date);
+      const prevBest = previousBest1RM(w.dayKey, effectiveName(ex), w.date);
       if (e1 > prevBest) {
-        prs.push({ name: ex.name, e1, weight: set.weight, reps: set.reps });
+        prs.push({ name: effectiveName(ex), e1, weight: set.weight, reps: set.reps });
       }
     });
   });
@@ -2291,7 +2532,7 @@ function previousBest1RM(dayKey, exName, beforeDate) {
   state.workouts.forEach(w => {
     if (w.dayKey !== dayKey) return;
     if (new Date(w.date) >= new Date(beforeDate)) return;
-    const ex = w.exercises.find(e => e.name === exName);
+    const ex = w.exercises.find(e => effectiveName(e) === exName);
     if (!ex) return;
     ex.sets.filter(s => s.logged).forEach(s => {
       const e1 = est1RM(s.weight, s.reps);
@@ -2719,16 +2960,18 @@ function restTier(restSec) {
 
 function renderExerciseCard(ex, idx, isCurrent) {
   const def = ex.def;
+  const dispName = effectiveName(ex);
   const isDone = ex.sets.every(s => s.logged);
   const isOpen = (isCurrent && !isDone) || idx === justCompletedExIdx;
-  const suggestion = suggestNext(state.current.dayKey, def);
+  const suggestion = ex.subTo ? null : suggestNext(state.current.dayKey, def, ex.variant);
   const patternKey = EX_PATTERN[ex.name] || EX_PATTERN[def.name];
   const svg = patternKey ? EX_SVG[patternKey] : "";
-  const ytQuery = encodeURIComponent(ex.name + " form proper");
+  const ytQuery = encodeURIComponent(dispName + " form proper");
   const tier = restTier(def.restSec);
+  const vOpts = VARIANTS[ex.name];
 
   // Previous session for this exercise (for per-set "last time" reference)
-  const last = findLastForExercise(state.current.dayKey, ex.name);
+  const last = findLastForExercise(state.current.dayKey, dispName, ex.variant);
   const lastSets = last ? last.exercise.sets.filter(s => s.logged) : [];
   const lastDropObj = last && last.exercise.dropSet && last.exercise.dropSet.logged ? last.exercise.dropSet : null;
   const lastDrop = lastDropObj
@@ -2744,10 +2987,16 @@ function renderExerciseCard(ex, idx, isCurrent) {
         <div class="ex-row1">
           <div class="ex-name-wrap">
             ${svg ? `<div class="ex-icon">${svg}</div>` : ""}
-            <div class="ex-name">${ex.name}</div>
+            <div class="ex-name">${dispName}${ex.subTo ? ' <span class="sub-chip">SUB</span>' : ''}</div>
           </div>
           <span class="chev">▾</span>
         </div>
+        ${vOpts && !ex.subTo ? `
+        <div class="variant-row" onclick="event.stopPropagation();">
+          <select class="variant-select" data-variant="${idx}">
+            ${vOpts.map(v => `<option value="${v}" ${(ex.variant || vOpts[0]) === v ? 'selected' : ''}>${v}</option>`).join("")}
+          </select>
+        </div>` : ""}
         <div class="ex-meta mono">
           <div class="ex-meta-item">${def.sets} × ${def.repsLow === 0 ? "AMRAP" : def.repsLow + "-" + def.repsHigh}</div>
           <div class="ex-meta-item rest-meta ${tier ? 'rest-' + tier : ''}">${tier ? '● ' : ''}Rest ${def.restSec ? fmtMMSS(def.restSec) : "—"}</div>
@@ -2778,7 +3027,7 @@ function renderExerciseCard(ex, idx, isCurrent) {
           const lastTxt = prev
             ? `${prev.weight} lb × ${prev.reps}${prev.rir != null ? ' @ RIR ' + prev.rir : ''}`
             : "N/A";
-          const bestAt = bestSetAtPosition(ex.name, sIdx);
+          const bestAt = bestSetAtPosition(dispName, sIdx, ex.variant);
           const bestTxt = bestAt
             ? `${bestAt.weight} lb × ${bestAt.reps}${bestAt.rir != null ? ' @ RIR ' + bestAt.rir : ''}`
             : "N/A";
@@ -2821,6 +3070,15 @@ function renderExerciseCard(ex, idx, isCurrent) {
           <div class="set-last" style="opacity:.7">${lastDrop ? `Last drop: ${lastDrop}` : 'Tap ✓ to finish — leave blank to skip'}</div>
         </div>
 
+        ${ex.subTo ? `
+          <div class="swap-active">⇄ Swapped from <strong>${ex.name}</strong> — <button class="swap-clear-link" data-swapclear="${idx}">undo</button></div>
+        ` : `
+          <button class="swap-toggle" data-swapbtn="${idx}">⇄ Swap exercise (machine busy, pain, etc.)</button>
+          <div class="swap-row" id="swapRow-${idx}" style="display:none;">
+            <input type="text" class="bw-input" data-swapinput="${idx}" placeholder="What are you doing instead?">
+            <button class="btn btn-sm" data-swapapply="${idx}" style="margin-top:8px;">Apply swap</button>
+          </div>
+        `}
         <textarea class="ex-notes-input" placeholder="Notes (form cues, pain, swaps...)" data-notes="${idx}">${esc(ex.notes || '')}</textarea>
         ${def.restSec ? `
           <button class="btn btn-outline btn-sm" style="margin-top: 10px;" data-rest="${def.restSec}">
@@ -2864,13 +3122,29 @@ function wireExerciseListeners() {
         return;
       }
 
+      // Unit-sanity guard: catch machine/implement mix-ups before they poison history
+      const exObj = state.current.exercises[exIdx];
+      const recentW = recentWeightsFor(exObj, 3);
+      if (recentW.length >= 2) {
+        const mx = Math.max(...recentW), mn = Math.min(...recentW);
+        if (weight > mx * 1.6 || (mn >= 20 && weight < mn * 0.45)) {
+          const ok = confirm(`${weight} lb is far outside your recent ${mn}–${mx} lb for ${effectiveName(exObj)}.\n\nDifferent machine or implement? Use the variant selector or Swap so history stays clean.\n\nLog anyway?`);
+          if (!ok) return;
+        }
+      }
+
       logSet(exIdx, sIdx, weight, reps, rir);
       wInput.value = weight;
       btn.classList.add("logged");
       btn.textContent = "✓";
       row.classList.add("logged");
       vibrate(40);
-      toast(`Set ${sIdx + 1} logged · ${weight} × ${reps}`);
+      // Effort warning: failure belongs on the final set, not earlier ones
+      if (rir === 0 && sIdx < exObj.sets.length - 1) {
+        toast(`⚠ RIR 0 on set ${sIdx + 1} — save failure for the final set`);
+      } else {
+        toast(`Set ${sIdx + 1} logged · ${weight} × ${reps}`);
+      }
 
       // If this finished the exercise, keep it open (so a drop set can be added) and re-render
       const currentEx = state.current.exercises[exIdx];
@@ -2897,7 +3171,12 @@ function wireExerciseListeners() {
 
       if (weight && reps) {
         state.current.exercises[exIdx].dropSet = { weight, reps, rir, logged: true, skipped: false };
-        toast(`Drop set logged · ${weight} × ${reps}`);
+        const dropCount = state.current.exercises.filter(e => e.dropSet && e.dropSet.logged).length;
+        if (dropCount >= 3) {
+          toast(`⚠ Drop set #${dropCount} today — keep drops to 1–2 lifts`);
+        } else {
+          toast(`Drop set logged · ${weight} × ${reps}`);
+        }
       } else {
         // No data entered — acknowledge as complete (green) without storing numbers
         state.current.exercises[exIdx].dropSet = { weight: null, reps: null, rir: null, logged: false, skipped: true };
@@ -2919,6 +3198,48 @@ function wireExerciseListeners() {
       const idx = parseInt(ta.dataset.notes);
       state.current.exercises[idx].notes = ta.value;
       saveState();
+    });
+  });
+
+  // Variant selector — switching re-renders so Last/Best/suggestion follow the variant
+  document.querySelectorAll("[data-variant]").forEach(sel => {
+    sel.addEventListener("change", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(sel.dataset.variant);
+      state.current.exercises[idx].variant = sel.value;
+      saveState();
+      renderToday();
+    });
+  });
+
+  // Swap exercise flow
+  document.querySelectorAll("[data-swapbtn]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const rowEl = document.getElementById("swapRow-" + btn.dataset.swapbtn);
+      if (rowEl) rowEl.style.display = rowEl.style.display === "none" ? "block" : "none";
+    });
+  });
+  document.querySelectorAll("[data-swapapply]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.swapapply);
+      const inp = document.querySelector(`[data-swapinput="${idx}"]`);
+      const val = (inp && inp.value || "").trim();
+      if (!val) { toast("Name the exercise you're doing instead"); return; }
+      state.current.exercises[idx].subTo = val;
+      saveState();
+      toast(`Swapped to ${val}`);
+      renderToday();
+    });
+  });
+  document.querySelectorAll("[data-swapclear]").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const idx = parseInt(btn.dataset.swapclear);
+      state.current.exercises[idx].subTo = null;
+      saveState();
+      renderToday();
     });
   });
 
@@ -3006,6 +3327,7 @@ function renderHistory() {
     <div class="card-title" style="margin: 2px 0 10px;">How You Rank</div>
     ${renderRankGrid()}
     ${renderBodyMap()}
+    ${renderEffortCard()}
 
     <div class="card">
       <div class="card-title">Browse by Exercise</div>
@@ -3343,6 +3665,15 @@ function renderDaily() {
     </div>
 
     <div class="card">
+      <div class="card-title">Training Phase</div>
+      <div class="phase-row">
+        ${[["cutting","Cutting"],["maintenance","Maintenance"],["bulking","Bulking"]].map(([id,label]) => `
+          <button class="phase-btn ${(state.phase || "maintenance") === id ? 'active' : ''}" data-phase="${id}">${label}</button>
+        `).join("")}
+      </div>
+    </div>
+
+    <div class="card">
       <div class="card-title">Morning Check-In</div>
       <div class="form-row">
         <div style="grid-column: 1 / -1;">
@@ -3444,7 +3775,7 @@ function renderDaily() {
       </div>
     ` : ""}
 
-    ${state.runs.length >= 2 ? `
+    ${(state.runs.length >= 2 || (state.garminWeeks || []).length >= 1) ? `
       <div class="card">
         <div class="card-title">Running Volume <span style="color: var(--text-dim); letter-spacing: 0; text-transform: none; font-weight: 500;">· weekly miles</span></div>
         <div class="chart-wrap"><canvas id="runVolChart"></canvas></div>
@@ -3506,6 +3837,15 @@ function renderDaily() {
   document.getElementById("ciDate").addEventListener("change", refreshCiButton);
 
   // Save button
+  document.querySelectorAll("[data-phase]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      state.phase = btn.dataset.phase;
+      saveState();
+      renderDaily();
+      toast(`Phase set: ${btn.dataset.phase}`);
+    });
+  });
+
   document.getElementById("ciSave").addEventListener("click", () => {
     const date = document.getElementById("ciDate").value;
     if (!date) { toast("Pick a date"); return; }
@@ -3578,7 +3918,7 @@ function renderDaily() {
   if (list.filter(c => c.vo2 != null).length >= 2) {
     drawDailyChart("vo2Chart", list, "vo2", "VO2 Max", "#06b6d4", "vo2");
   }
-  if (state.runs.length >= 2) drawRunVolumeChart();
+  if (state.runs.length >= 2 || (state.garminWeeks || []).length >= 1) drawRunVolumeChart();
 }
 
 function parseIntOrNull(v) {
@@ -3616,6 +3956,12 @@ function drawRunVolumeChart() {
     const m = mondayOf(new Date(r.date)).getTime();
     const wk = weeks.find(w => w.start.getTime() === m);
     if (wk) wk.miles += r.distance;
+  });
+  // Garmin weekly totals override logged-run sums for their week (watch = source of truth)
+  (state.garminWeeks || []).forEach(g => {
+    const gm = parseLocalDate(g.weekStart).getTime();
+    const wk = weeks.find(w => w.start.getTime() === gm);
+    if (wk) wk.miles = g.miles;
   });
 
   const labels = weeks.map(w => `${w.start.getMonth() + 1}/${w.start.getDate()}`);
@@ -3775,6 +4121,25 @@ function renderRun() {
       </div>
     </div>
 
+    <div class="card">
+      <div class="card-title">Garmin Weekly Mileage</div>
+      <div class="small" style="margin-bottom: 10px;">Watch tracks your runs? Log the week's total here so the volume chart stays honest — one number, once a week.</div>
+      <div class="form-row">
+        <div>
+          <div class="form-label">Miles · week of ${fmtDate(mondayIso())}</div>
+          <input type="number" inputmode="decimal" step="0.1" class="bw-input" id="garminMiles" placeholder="23.6" value="${(state.garminWeeks || []).find(g => g.weekStart === mondayIso())?.miles ?? ''}">
+        </div>
+        <div style="display:flex; align-items:flex-end;">
+          <button class="btn" id="garminSave" style="width:100%;">Save week</button>
+        </div>
+      </div>
+      ${(state.garminWeeks || []).length ? `
+        <div class="small mono" style="margin-top: 10px; color: var(--text-dim);">
+          ${[...state.garminWeeks].sort((a,b) => b.weekStart.localeCompare(a.weekStart)).slice(0, 4).map(g => `wk ${fmtDate(g.weekStart)} · ${g.miles} mi`).join("<br>")}
+        </div>
+      ` : ""}
+    </div>
+
     ${state.runs.length ? `
       <div class="card">
         <div class="card-title">History</div>
@@ -3813,6 +4178,20 @@ function renderRun() {
       btn.classList.add("active");
       selectedType = btn.dataset.rtype;
     });
+  });
+
+  const gBtn = document.getElementById("garminSave");
+  if (gBtn) gBtn.addEventListener("click", () => {
+    const v = parseFloat(document.getElementById("garminMiles").value);
+    if (isNaN(v) || v < 0) { toast("Enter this week's miles"); return; }
+    if (!state.garminWeeks) state.garminWeeks = [];
+    const wk = mondayIso();
+    const existing = state.garminWeeks.find(g => g.weekStart === wk);
+    if (existing) existing.miles = v; else state.garminWeeks.push({ weekStart: wk, miles: v });
+    saveState();
+    toast(`Week logged · ${v} mi`);
+    vibrate(30);
+    renderRun();
   });
 
   // Alternatives dropdown updates the displayed workout in place
@@ -3945,7 +4324,7 @@ function renderData() {
     </div>
 
     <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">
-      Lift Log · V-1.25
+      Lift Log · V-1.26
     </div>
   `;
 
