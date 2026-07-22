@@ -12,6 +12,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
   :root {
     --bg: #0a0a0a;
@@ -1289,6 +1291,7 @@
     border-color: var(--accent);
     color: var(--accent);
   }
+  .pdf-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
   /* ---- All-time total volume banner ---- */
   .vol-banner {
@@ -2161,25 +2164,28 @@ function bodyTierColor(topPct) {
   return "#55555f";                        // gray tier
 }
 
-function renderBodyMap() {
+// Builds the front/back muscle-map SVG. opts.base / opts.stroke / opts.textColor
+// let the PDF render a light version; the app uses the dark defaults.
+function buildBodyMapSVG(opts) {
+  opts = opts || {};
+  const BASE = opts.base || "#33333b";
+  const STROKE = opts.stroke || "#0f0f14";
+  const TXT = opts.textColor || "#666";
   const by = {};
   rankCardsData().forEach(c => { by[c.name] = c.topPct; });
-  const BASE = "#33333b";                  // inert body (head, arms, abs, shins)
   const chest = bodyTierColor(by["Bench"]);
   const shoulder = bodyTierColor(by["Shoulder Press"]);
   const quads = bodyTierColor(by["Squat"]);
-  const posterior = bodyTierColor(by["Deadlift"]);   // glutes + hamstrings
+  const posterior = bodyTierColor(by["Deadlift"]);
   const back = bodyTierColor(by["Lat Pull"]);
   const feet = bodyTierColor(by["VO₂ Max"]);
   const biceps = bodyTierColor(by["Biceps"]);
   const triceps = bodyTierColor(by["Triceps"]);
   const calves = bodyTierColor(by["Calves"]);
-
-  const svg = `
-  <svg viewBox="0 0 300 250" width="100%" style="max-width:340px;display:block;margin:4px auto 0;" xmlns="http://www.w3.org/2000/svg">
-    <g stroke="#0f0f14" stroke-width="1" stroke-linejoin="round">
-      <!-- ===== FRONT (cx 78) ===== -->
-      <!-- base body -->
+  const dims = opts.explicitSize ? `width="${opts.explicitSize.w}" height="${opts.explicitSize.h}"` : `width="100%" style="max-width:340px;display:block;margin:4px auto 0;"`;
+  return `
+  <svg viewBox="0 0 300 250" ${dims} xmlns="http://www.w3.org/2000/svg">
+    <g stroke="${STROKE}" stroke-width="1" stroke-linejoin="round">
       <circle cx="78" cy="16" r="11" fill="${BASE}"/>
       <rect x="73" y="24" width="10" height="7" rx="3" fill="${BASE}"/>
       <rect x="38" y="44" width="10" height="32" rx="5" fill="${biceps}"/>
@@ -2189,21 +2195,14 @@ function renderBodyMap() {
       <rect x="64" y="62" width="28" height="44" rx="9" fill="${BASE}"/>
       <rect x="63" y="160" width="13" height="52" rx="6" fill="${BASE}"/>
       <rect x="80" y="160" width="13" height="52" rx="6" fill="${BASE}"/>
-      <!-- shoulders -->
       <ellipse cx="52" cy="46" rx="12" ry="9" fill="${shoulder}"/>
       <ellipse cx="104" cy="46" rx="12" ry="9" fill="${shoulder}"/>
-      <!-- chest -->
       <ellipse cx="69" cy="53" rx="11" ry="11" fill="${chest}"/>
       <ellipse cx="87" cy="53" rx="11" ry="11" fill="${chest}"/>
-      <!-- quads -->
       <rect x="61" y="103" width="16" height="60" rx="7" fill="${quads}"/>
       <rect x="79" y="103" width="16" height="60" rx="7" fill="${quads}"/>
-      <!-- feet -->
       <ellipse cx="69" cy="216" rx="10" ry="6" fill="${feet}"/>
       <ellipse cx="87" cy="216" rx="10" ry="6" fill="${feet}"/>
-
-      <!-- ===== BACK (cx 222) ===== -->
-      <!-- base body -->
       <circle cx="222" cy="16" r="11" fill="${BASE}"/>
       <rect x="217" y="24" width="10" height="7" rx="3" fill="${BASE}"/>
       <rect x="182" y="44" width="10" height="32" rx="5" fill="${triceps}"/>
@@ -2212,24 +2211,23 @@ function renderBodyMap() {
       <rect x="256" y="74" width="9" height="30" rx="4" fill="${BASE}"/>
       <rect x="207" y="160" width="13" height="52" rx="6" fill="${calves}"/>
       <rect x="224" y="160" width="13" height="52" rx="6" fill="${calves}"/>
-      <!-- shoulders (rear delts) -->
       <ellipse cx="196" cy="46" rx="12" ry="9" fill="${shoulder}"/>
       <ellipse cx="248" cy="46" rx="12" ry="9" fill="${shoulder}"/>
-      <!-- back / lats (V-taper) -->
       <path d="M206 42 L238 42 Q245 64 236 94 Q230 106 222 106 Q214 106 208 94 Q199 64 206 42 Z" fill="${back}"/>
-      <!-- glutes -->
       <ellipse cx="214" cy="112" rx="10" ry="9" fill="${posterior}"/>
       <ellipse cx="230" cy="112" rx="10" ry="9" fill="${posterior}"/>
-      <!-- hamstrings -->
       <rect x="205" y="118" width="15" height="48" rx="7" fill="${posterior}"/>
       <rect x="224" y="118" width="15" height="48" rx="7" fill="${posterior}"/>
-      <!-- feet -->
       <ellipse cx="214" cy="216" rx="10" ry="6" fill="${feet}"/>
       <ellipse cx="230" cy="216" rx="10" ry="6" fill="${feet}"/>
     </g>
-    <text x="78" y="238" text-anchor="middle" fill="#666" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="2">FRONT</text>
-    <text x="222" y="238" text-anchor="middle" fill="#666" font-size="10" font-family="JetBrains Mono, monospace" letter-spacing="2">BACK</text>
+    <text x="78" y="238" text-anchor="middle" fill="${TXT}" font-size="10" font-family="monospace" letter-spacing="2">FRONT</text>
+    <text x="222" y="238" text-anchor="middle" fill="${TXT}" font-size="10" font-family="monospace" letter-spacing="2">BACK</text>
   </svg>`;
+}
+
+function renderBodyMap() {
+  const svg = buildBodyMapSVG();
 
   return `
     <div class="card">
@@ -3288,6 +3286,322 @@ function refreshProgressBars() {
 // ============================================================================
 let historyFocus = null; // { dayKey, exerciseName } when drilled in
 
+// ============================================================================
+// PDF EXPORT — client-side (jsPDF + autotable). Quick = 1-page highlights,
+// Full = every workout, run, and chart. Light theme with vibrant tier accents.
+// ============================================================================
+function hexToRgb(h) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(h || "");
+  if (!m) return [85, 85, 95];
+  const n = parseInt(m[1], 16);
+  return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+}
+
+// Rasterize an SVG string to a PNG data URL at 2x for crisp print.
+function svgToPng(svg, w, h) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const blob = new Blob([svg], { type: "image/svg+xml;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      const c = document.createElement("canvas");
+      c.width = w * 2; c.height = h * 2;
+      const ctx = c.getContext("2d");
+      ctx.scale(2, 2);
+      ctx.drawImage(img, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      resolve(c.toDataURL("image/png"));
+    };
+    img.onerror = (e) => { URL.revokeObjectURL(url); reject(e); };
+    img.src = url;
+  });
+}
+
+// Render a Chart.js config to a PNG data URL via an offscreen canvas.
+async function chartImage(cfg, w, h) {
+  const c = document.createElement("canvas");
+  c.width = w; c.height = h;
+  c.style.cssText = `position:absolute;left:-99999px;width:${w}px;height:${h}px;`;
+  document.body.appendChild(c);
+  const ch = new Chart(c.getContext("2d"), {
+    ...cfg,
+    options: {
+      ...(cfg.options || {}),
+      responsive: false, animation: false, devicePixelRatio: 2,
+      plugins: { ...((cfg.options || {}).plugins || {}), legend: { display: false } }
+    }
+  });
+  await new Promise(r => setTimeout(r, 80));
+  const url = c.toDataURL("image/png");
+  ch.destroy(); c.remove();
+  return url;
+}
+
+function pdfLineCfg(labels, data, hex, label) {
+  const [r, g, b] = hexToRgb(hex);
+  return {
+    type: "line",
+    data: { labels, datasets: [{ label, data, borderColor: hex, backgroundColor: `rgba(${r},${g},${b},0.12)`, borderWidth: 2, tension: 0.3, fill: true, pointRadius: 2, pointBackgroundColor: hex }] },
+    options: { scales: { x: { ticks: { color: "#888", font: { size: 9 } }, grid: { color: "#eee" } }, y: { ticks: { color: "#888", font: { size: 9 } }, grid: { color: "#eee" } } } }
+  };
+}
+
+async function exportPDF(mode) {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    toast("PDF tools didn't load — check your connection and retry");
+    return;
+  }
+  if (!state.workouts.length) { toast("No workouts to export yet"); return; }
+  toast(mode === "full" ? "Building full report…" : "Building summary…");
+
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: "pt", format: "letter" });
+    const PW = 612, PH = 792, M = 40, CW = PW - M * 2;
+    const INK = [31, 41, 55], MUTED = [107, 114, 128], ACCENT = [245, 158, 11], LINE = [226, 232, 240];
+    let y = M;
+
+    const dates = state.workouts.map(w => w.date).sort();
+    const rangeStr = `${fmtDate(dates[0])} – ${fmtDate(dates[dates.length - 1])}`;
+
+    const ensure = (space) => { if (y + space > PH - M) { doc.addPage(); y = M; } };
+    const sectionTitle = (t) => {
+      ensure(34);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(13); doc.setTextColor(...INK);
+      doc.text(t, M, y);
+      doc.setDrawColor(...ACCENT); doc.setLineWidth(2);
+      doc.line(M, y + 5, M + 34, y + 5);
+      y += 22;
+    };
+
+    // ---- Title block ----
+    doc.setFillColor(17, 17, 20);
+    doc.rect(0, 0, PW, 74, "F");
+    doc.setFont("helvetica", "bold"); doc.setFontSize(22); doc.setTextColor(255, 255, 255);
+    doc.text("LIFT LOG", M, 38);
+    doc.setFont("helvetica", "normal"); doc.setFontSize(10); doc.setTextColor(245, 158, 11);
+    doc.text(mode === "full" ? "Full Training Report" : "Training Summary", M, 56);
+    doc.setTextColor(180, 180, 185); doc.setFontSize(9);
+    doc.text(`${rangeStr}   ·   generated ${fmtDate(new Date().toISOString())}`, M, 68);
+    y = 96;
+
+    // ---- Rank bubbles (left) + muscle map (right) ----
+    const cards = rankCardsData();
+    const bx = M, bw = 288, colW = (bw - 8) / 2, rowH = 42, gap = 6;
+    let bi = 0;
+    for (const card of cards) {
+      const col = bi % 2, row = Math.floor(bi / 2);
+      const x = bx + col * (colW + 8), by = y + row * (rowH + gap);
+      const hex = bodyTierColor(card.topPct);
+      const [r, g, b] = hexToRgb(hex);
+      const dark = hex === "#fbbf24";
+      doc.setFillColor(r, g, b);
+      doc.roundedRect(x, by, colW, rowH, 5, 5, "F");
+      doc.setTextColor(dark ? 26 : 255, dark ? 17 : 255, dark ? 0 : 255);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(6.5);
+      doc.text(card.name.toUpperCase(), x + 8, by + 12);
+      doc.setFontSize(15);
+      doc.text(card.value != null ? card.value + (card.unit ? " " + card.unit : "") : "—", x + 8, by + 28);
+      doc.setFontSize(7.5);
+      doc.text(card.pctLabel || "No data yet", x + 8, by + 38);
+      bi++;
+    }
+    const bubblesH = Math.ceil(cards.length / 2) * (rowH + gap);
+
+    // Muscle map image (light theme) on the right
+    const mmW = 232, mmH = Math.round(mmW * 250 / 300);
+    try {
+      const mmSvg = buildBodyMapSVG({ base: "#e5e7eb", stroke: "#cbd5e1", textColor: "#94a3b8", explicitSize: { w: mmW, h: mmH } });
+      const mmPng = await svgToPng(mmSvg, mmW, mmH);
+      doc.addImage(mmPng, "PNG", M + bw + 12, y + Math.max(0, (bubblesH - mmH) / 2), mmW, mmH);
+    } catch (e) { /* muscle map optional */ }
+
+    y += bubblesH + 22;
+
+    // ---- Headline stat boxes ----
+    const totalVol = totalVolumeAllTime();
+    const totalWorkouts = state.workouts.length;
+    let totalSets = 0, totalDrops = 0;
+    state.workouts.forEach(w => w.exercises.forEach(ex => {
+      totalSets += ex.sets.filter(s => s.logged).length;
+      if (ex.dropSet && ex.dropSet.logged) totalDrops++;
+    }));
+    const totalCheckins = (state.dailyCheckins || []).length;
+    const totalRuns = (state.runs || []).length;
+    const gWeeks = (state.garminWeeks || []).length;
+
+    const stats = [
+      [totalVol.toLocaleString(), "lb lifted"],
+      [String(totalWorkouts), "workouts"],
+      [String(totalSets + totalDrops), "sets logged"],
+      [String(totalCheckins), "check-ins"],
+      [String(totalRuns + gWeeks), totalRuns + gWeeks === 1 ? "run logged" : "runs logged"]
+    ];
+    ensure(64);
+    const sw = (CW - 4 * 8) / 5, sh = 56;
+    stats.forEach((st, i) => {
+      const x = M + i * (sw + 8);
+      doc.setFillColor(247, 248, 250); doc.setDrawColor(...LINE); doc.setLineWidth(1);
+      doc.roundedRect(x, y, sw, sh, 6, 6, "FD");
+      doc.setTextColor(...INK); doc.setFont("helvetica", "bold");
+      let fs = 15; if (st[0].length > 8) fs = 11; if (st[0].length > 11) fs = 9;
+      doc.setFontSize(fs);
+      doc.text(st[0], x + sw / 2, y + 26, { align: "center" });
+      doc.setFont("helvetica", "normal"); doc.setFontSize(7.5); doc.setTextColor(...MUTED);
+      doc.text(st[1], x + sw / 2, y + 42, { align: "center" });
+    });
+    y += sh + 20;
+
+    if (mode === "quick") {
+      doc.setFont("helvetica", "italic"); doc.setFontSize(8); doc.setTextColor(...MUTED);
+      doc.text("Lift Log — quick summary. Use Full Summary for the complete breakdown.", M, PH - 24);
+      doc.save(`LiftLog_Summary_${todayIsoDate()}.pdf`);
+      toast("Summary PDF saved");
+      return;
+    }
+
+    // ================= FULL REPORT =================
+    // ---- Per-lift bests ----
+    const bestByLift = {};
+    state.workouts.forEach(w => w.exercises.forEach(ex => {
+      const nm = effectiveName(ex);
+      ex.sets.filter(s => s.logged && s.weight && s.reps).forEach(s => {
+        const e1 = est1RM(s.weight, s.reps);
+        if (!bestByLift[nm] || e1 > bestByLift[nm].e1) bestByLift[nm] = { e1, weight: s.weight, reps: s.reps, rir: s.rir };
+      });
+    }));
+    const bestRows = Object.entries(bestByLift).sort((a, b) => b[1].e1 - a[1].e1).map(([nm, b]) => {
+      const map = STD_MAP[nm];
+      const pc = map ? strengthPercentile(b.e1, map.std) : null;
+      return [nm, `${b.e1} lb`, `${b.weight}×${b.reps}${b.rir != null ? " @" + b.rir : ""}`, pc ? pc.label : "—"];
+    });
+    sectionTitle("Personal Bests (est. 1RM)");
+    doc.autoTable({
+      startY: y, margin: { left: M, right: M },
+      head: [["Exercise", "e1RM", "Best Set", "vs gym-goers"]],
+      body: bestRows,
+      styles: { fontSize: 8, cellPadding: 4, textColor: INK, lineColor: LINE, lineWidth: 0.5 },
+      headStyles: { fillColor: [31, 41, 55], textColor: 255, fontSize: 8 },
+      alternateRowStyles: { fillColor: [247, 248, 250] }
+    });
+    y = doc.lastAutoTable.finalY + 20;
+
+    // ---- Training effort ----
+    const effort = effortCheckData();
+    if (effort.length) {
+      sectionTitle("Training Effort (recent sessions)");
+      doc.autoTable({
+        startY: y, margin: { left: M, right: M },
+        head: [["Compound", "Avg RIR", "e1RM Trend"]],
+        body: effort.map(r => [r.name, r.avgRir != null ? r.avgRir.toFixed(1) : "—", `${r.delta >= 0 ? "+" : ""}${r.delta.toFixed(1)}%${r.grinding ? "  ⚠ grinding" : ""}`]),
+        styles: { fontSize: 8, cellPadding: 4, textColor: INK, lineColor: LINE, lineWidth: 0.5 },
+        headStyles: { fillColor: [31, 41, 55], textColor: 255, fontSize: 8 },
+        alternateRowStyles: { fillColor: [247, 248, 250] }
+      });
+      y = doc.lastAutoTable.finalY + 20;
+    }
+
+    // ---- Recovery & body averages ----
+    const ci = state.dailyCheckins || [];
+    const avg = (arr) => arr.length ? (arr.reduce((a, b) => a + b, 0) / arr.length) : null;
+    const hrvA = avg(ci.filter(c => c.hrv != null).map(c => c.hrv));
+    const slpA = avg(ci.filter(c => c.sleepScore != null).map(c => c.sleepScore));
+    const bbA = avg(ci.filter(c => c.bodyBattery != null).map(c => c.bodyBattery));
+    const wSeries = getWeightSeries();
+    const vo2s = ci.filter(c => c.vo2 != null).map(c => c.vo2);
+    const recRows = [];
+    if (hrvA != null) recRows.push(["Avg HRV", `${hrvA.toFixed(0)} ms`]);
+    if (slpA != null) recRows.push(["Avg sleep score", slpA.toFixed(0)]);
+    if (bbA != null) recRows.push(["Avg body battery", bbA.toFixed(0)]);
+    if (vo2s.length) recRows.push(["Latest VO₂ max", `${vo2s[vo2s.length - 1]}`]);
+    if (wSeries.length) recRows.push(["Bodyweight", `${wSeries[0].weight} → ${wSeries[wSeries.length - 1].weight} lb (${(wSeries[wSeries.length - 1].weight - wSeries[0].weight >= 0 ? "+" : "")}${(wSeries[wSeries.length - 1].weight - wSeries[0].weight).toFixed(1)})`]);
+    const gm = state.garminWeeks || [];
+    if (gm.length) recRows.push(["Avg weekly mileage", `${(avg(gm.map(g => g.miles))).toFixed(1)} mi`]);
+    recRows.push(["Training phase", (state.phase || "maintenance")]);
+    if (recRows.length) {
+      sectionTitle("Recovery & Body");
+      doc.autoTable({
+        startY: y, margin: { left: M, right: M },
+        body: recRows,
+        styles: { fontSize: 8.5, cellPadding: 4, textColor: INK, lineColor: LINE, lineWidth: 0.5 },
+        columnStyles: { 0: { fontStyle: "bold", cellWidth: 160 } }
+      });
+      y = doc.lastAutoTable.finalY + 20;
+    }
+
+    // ---- Charts ----
+    const charts = [];
+    if (wSeries.length >= 2) charts.push(["Bodyweight (lb)", pdfLineCfg(wSeries.map(b => fmtDate(b.date)), wSeries.map(b => b.weight), "#f59e0b")]);
+    const hrvSeries = ci.filter(c => c.hrv != null).sort((a, b) => a.date.localeCompare(b.date));
+    if (hrvSeries.length >= 2) charts.push(["HRV (ms)", pdfLineCfg(hrvSeries.map(c => fmtDate(c.date)), hrvSeries.map(c => c.hrv), "#f59e0b")]);
+    const vo2Series = ci.filter(c => c.vo2 != null).sort((a, b) => a.date.localeCompare(b.date));
+    if (vo2Series.length >= 2) charts.push(["VO₂ Max", pdfLineCfg(vo2Series.map(c => fmtDate(c.date)), vo2Series.map(c => c.vo2), "#06b6d4")]);
+
+    if (charts.length) {
+      sectionTitle("Trends");
+      for (const [label, cfg] of charts) {
+        ensure(150);
+        doc.setFont("helvetica", "bold"); doc.setFontSize(9); doc.setTextColor(...MUTED);
+        doc.text(label, M, y); y += 8;
+        try {
+          const img = await chartImage(cfg, 760, 300);
+          const iw = CW, ih = iw * 300 / 760;
+          doc.addImage(img, "PNG", M, y, iw, ih);
+          y += ih + 16;
+        } catch (e) { y += 4; }
+      }
+    }
+
+    // ---- Full workout log ----
+    doc.addPage(); y = M;
+    sectionTitle("Complete Workout Log");
+    const chrono = [...state.workouts].sort((a, b) => a.date.localeCompare(b.date));
+    for (const w of chrono) {
+      const vol = w.exercises.reduce((s, e) => s + e.sets.filter(x => x.logged).reduce((s2, x) => s2 + (x.weight * x.reps), 0), 0);
+      ensure(60);
+      doc.setFont("helvetica", "bold"); doc.setFontSize(10); doc.setTextColor(...INK);
+      doc.text(`${fmtDateLong(w.date)} · ${w.dayName}`, M, y);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
+      doc.text(`${vol.toLocaleString()} lb`, PW - M, y, { align: "right" });
+      y += 8;
+
+      const body = [];
+      w.exercises.forEach(ex => {
+        const sets = ex.sets.filter(s => s.logged);
+        const nm = effectiveName(ex) + (ex.variant ? ` (${ex.variant})` : "") + (ex.subTo ? " [sub]" : "");
+        if (!sets.length && !(ex.dropSet && ex.dropSet.logged)) return;
+        sets.forEach((s, i) => body.push([i === 0 ? nm : "", `${s.weight}`, `${s.reps}`, s.rir != null ? `${s.rir}` : "—"]));
+        if (ex.dropSet && ex.dropSet.logged) body.push([sets.length ? "" : nm, `${ex.dropSet.weight} (drop)`, `${ex.dropSet.reps}`, ex.dropSet.rir != null ? `${ex.dropSet.rir}` : "—"]);
+        if (ex.notes && ex.notes.trim()) body.push([{ content: "↳ " + ex.notes.trim(), colSpan: 4, styles: { fontStyle: "italic", textColor: MUTED, fontSize: 7 } }]);
+      });
+      if (!body.length) { y += 6; continue; }
+      doc.autoTable({
+        startY: y, margin: { left: M, right: M },
+        head: [["Exercise", "Weight", "Reps", "RIR"]],
+        body,
+        styles: { fontSize: 7.5, cellPadding: 3, textColor: INK, lineColor: LINE, lineWidth: 0.4 },
+        headStyles: { fillColor: [55, 65, 81], textColor: 255, fontSize: 7.5 },
+        columnStyles: { 0: { cellWidth: 300 }, 1: { halign: "center" }, 2: { halign: "center" }, 3: { halign: "center" } }
+      });
+      y = doc.lastAutoTable.finalY + 14;
+    }
+
+    // ---- Page numbers ----
+    const pages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= pages; p++) {
+      doc.setPage(p);
+      doc.setFont("helvetica", "normal"); doc.setFontSize(8); doc.setTextColor(...MUTED);
+      doc.text(`Lift Log · ${p} / ${pages}`, PW - M, PH - 20, { align: "right" });
+    }
+
+    doc.save(`LiftLog_Full_${todayIsoDate()}.pdf`);
+    toast("Full report saved");
+  } catch (e) {
+    console.error(e);
+    toast("PDF export failed — see console");
+  }
+}
+
 function renderHistory() {
   const cont = document.getElementById("historyContent");
   const count = state.workouts.length;
@@ -3324,6 +3638,15 @@ function renderHistory() {
 
   cont.innerHTML = `
     ${renderVolumeBanner()}
+    <div class="card">
+      <div class="card-title">Export PDF</div>
+      <div class="small" style="margin-bottom: 10px;">A clean, shareable report of your training.</div>
+      <div class="pdf-btn-row">
+        <button class="btn btn-outline" id="pdfQuick">Quick Summary</button>
+        <button class="btn" id="pdfFull">Full Summary</button>
+      </div>
+      <div class="small" style="margin-top: 8px; color: var(--text-dim);">Quick = one-page highlights. Full = every workout, run &amp; chart.</div>
+    </div>
     <div class="card-title" style="margin: 2px 0 10px;">How You Rank</div>
     ${renderRankGrid()}
     ${renderBodyMap()}
@@ -3363,6 +3686,11 @@ function renderHistory() {
       }), "View all {n} workouts")}
     </div>
   `;
+
+  const pq = document.getElementById("pdfQuick");
+  const pf = document.getElementById("pdfFull");
+  if (pq) pq.addEventListener("click", () => exportPDF("quick"));
+  if (pf) pf.addEventListener("click", () => exportPDF("full"));
 
   cont.querySelectorAll("[data-day-history]").forEach(el => {
     el.addEventListener("click", () => {
@@ -4324,7 +4652,7 @@ function renderData() {
     </div>
 
     <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">
-      Lift Log · V-1.26
+      Lift Log · V-1.27
     </div>
   `;
 
