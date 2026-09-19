@@ -468,59 +468,6 @@
   .rest-bar.done .rest-time { color: var(--success); }
   .rest-bar .rest-actions { display: flex; gap: 6px; }
 
-  /* Big rest timer overlay */
-  .timer-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-    padding: 20px;
-    text-align: center;
-  }
-  .timer-overlay.show { display: flex; }
-  .timer-overlay.flash {
-    animation: flash 0.4s ease 3;
-  }
-  @keyframes flash {
-    0%, 100% { background: var(--bg); }
-    50% { background: var(--accent); }
-  }
-  .timer-big {
-    font-family: 'JetBrains Mono', monospace;
-    font-size: clamp(80px, 28vw, 140px);
-    font-weight: 700;
-    line-height: 1;
-    letter-spacing: -0.04em;
-    color: var(--accent);
-  }
-  .timer-overlay.done .timer-big { color: var(--success); }
-  .timer-label {
-    font-size: 12px;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-    font-weight: 600;
-  }
-  .timer-target {
-    color: var(--text-dim);
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 16px;
-    margin-top: 12px;
-  }
-  .timer-actions {
-    display: flex;
-    gap: 10px;
-    margin-top: 40px;
-    width: 100%;
-    max-width: 320px;
-  }
-  .timer-actions .btn { flex: 1; }
-
   /* ---- Bottom nav ---- */
   .nav {
     position: fixed;
@@ -1293,6 +1240,50 @@
   }
   .pdf-btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
+  /* ---- Rest clock band (counts up from the last logged set) ---- */
+  .rest-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 0 0 12px;
+    padding: 9px 14px;
+    border-radius: 10px;
+    font-family: 'JetBrains Mono', monospace;
+    border: 1px solid transparent;
+    transition: background-color .35s ease, color .35s ease, border-color .35s ease;
+  }
+  .rest-band .rb-label {
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    opacity: 0.85;
+  }
+  .rest-band .rb-elapsed {
+    font-size: 21px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .rest-band .rb-target { font-size: 10.5px; font-weight: 600; opacity: 0.8; }
+  .rest-band.rb-idle   { background: var(--bg-elev); border-color: var(--border); color: var(--text-muted); }
+  .rest-band.rb-red    { background: rgba(239,68,68,0.16);  border-color: rgba(239,68,68,0.5);  color: #fca5a5; }
+  .rest-band.rb-yellow { background: rgba(245,158,11,0.16); border-color: rgba(245,158,11,0.5); color: #fcd34d; }
+  .rest-band.rb-green  { background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.55); color: #6ee7b7; }
+
+  /* ---- Collapsible Core / Stretching sections ---- */
+  .sect-collapse > summary {
+    list-style: none;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+  }
+  .sect-collapse > summary::-webkit-details-marker { display: none; }
+  .sect-chev { color: var(--text-muted); font-size: 13px; transition: transform .2s; }
+  .sect-collapse[open] .sect-chev { transform: rotate(180deg); }
+
   /* ---- All-time total volume banner ---- */
   .vol-banner {
     border-radius: 16px;
@@ -1384,17 +1375,6 @@
   </div>
 </div>
 
-<!-- ============ REST TIMER OVERLAY ============ -->
-<div id="timerOverlay" class="timer-overlay">
-  <div class="timer-label">Rest</div>
-  <div class="timer-big mono" id="timerDisplay">3:00</div>
-  <div class="timer-target mono" id="timerTarget">Target: 3:00</div>
-  <div class="timer-actions">
-    <button class="btn btn-ghost" id="timerSkip">Skip</button>
-    <button class="btn btn-outline" id="timerAdd">+30s</button>
-  </div>
-</div>
-
 <!-- ============ TOAST ============ -->
 <div id="toast" class="toast"></div>
 
@@ -1433,11 +1413,11 @@ const PLAN = {
     subtitle: "Heavy",
     exercises: [
       { name: "DB Bench Press", sets: 3, repsLow: 5, repsHigh: 8, restSec: 210, isCompound: true, rirHint: "Top set to failure", notes: "" },
+      { name: "Overhead DB Tricep Extension", sets: 3, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "", notes: "Full stretch > load." },
       { name: "Seated DB Shoulder Press", sets: 3, repsLow: 6, repsHigh: 10, restSec: 150, isCompound: true, rirHint: "RIR 1, 1, 0", notes: "" },
       { name: "Incline DB Press", sets: 2, repsLow: 8, repsHigh: 10, restSec: 120, isCompound: true, rirHint: "RIR 1", notes: "" },
       { name: "DB Lateral Raise", sets: 4, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Last set: myo-reps or drop", notes: "" },
-      { name: "Cable Tricep Pushdown", sets: 3, repsLow: 8, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "Straight bar." },
-      { name: "Overhead Cable Tricep Ext (rope)", sets: 2, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "Burnout", notes: "Full stretch at the bottom." }
+      { name: "Cable Tricep Pushdown", sets: 3, repsLow: 8, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "Straight bar." }
     ]
   },
   pullA: {
@@ -1448,9 +1428,11 @@ const PLAN = {
       { name: "Bent Barbell Row", sets: 3, repsLow: 6, repsHigh: 10, restSec: 150, isCompound: true, rirHint: "RIR 1", notes: "Torso ~30° from horizontal." },
       { name: "Single-Arm Cable Row (shotgun)", sets: 2, repsLow: 8, repsHigh: 12, restSec: 90, isCompound: true, rirHint: "RIR 1", notes: "" },
       { name: "Rear Delt Cable Fly", sets: 3, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Light, slow", notes: "Crossed cables." },
+      { name: "Cable Lateral Raise", sets: 3, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "Cable behind the back, lead with the elbow. Constant tension beats a DB here." },
       { name: "Barbell or DB Curl", sets: 3, repsLow: 6, repsHigh: 10, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "" },
       { name: "Hammer Curl", sets: 2, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "Brachialis emphasis", notes: "DB or rope. No swing." }
-    ]
+    ],
+    hasCore: true
   },
   legs: {
     name: "Legs",
@@ -1462,22 +1444,23 @@ const PLAN = {
       { name: "Romanian Deadlift", sets: 2, repsLow: 8, repsHigh: 10, restSec: 120, isCompound: true, rirHint: "Hamstring stretch focus", notes: "DB or BB. Slow stretch on the eccentric." },
       { name: "Leg Extension", sets: 2, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "Pause 1s at top." },
       { name: "Seated Leg Curl", sets: 3, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "RIR 1", notes: "Hamstring isolation." },
-      { name: "Seated Calf Raise", sets: 2, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Slow eccentric (3s)", notes: "Soleus — bent knee." }
-    ],
-    hasCore: true
+      { name: "Seated Calf Raise", sets: 2, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Slow eccentric (3s)", notes: "Soleus — bent knee." },
+      { name: "Band Work \u2014 Hips & Running Support", sets: 4, repsLow: 12, repsHigh: 20, restSec: 90, isCompound: false, rirHint: "Burn, not failure", notes: "Sets 1\u20132: Banded Lateral Walk \u2014 band above the knees, quarter-squat, 12\u201320 steps each direction. Sets 3\u20134: Banded Clamshell \u2014 12\u201320 per side, pause at the top. Log band resistance in the weight box, or leave it blank." }
+    ]
   },
   pushB: {
     name: "Push B",
     subtitle: "Hypertrophy",
     exercises: [
       { name: "Incline DB Press", sets: 3, repsLow: 8, repsHigh: 12, restSec: 150, isCompound: true, rirHint: "Top set to failure", notes: "Big stretch at the bottom. Safe to fail (drop the DBs)." },
-      { name: "Overhead DB Tricep Extension", sets: 3, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "", notes: "Full stretch > load." },
+      { name: "Overhead DB Tricep Extension", sets: 3, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "", notes: "Full stretch > load. Breaks up the two chest presses." },
+      { name: "DB Bench Press", sets: 3, repsLow: 8, repsHigh: 12, restSec: 180, isCompound: true, rirHint: "Top set to failure", notes: "Flat. Higher reps than Push A — safe to fail (drop the DBs)." },
       { name: "DB Lateral Raise", sets: 4, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "" },
-      { name: "Smith Bench Press (flat)", sets: 3, repsLow: 6, repsHigh: 8, restSec: 180, isCompound: true, rirHint: "Top set to failure", notes: "Grab a spotter when you can." },
       { name: "Cable Y-Raise / Reverse Pec Deck", sets: 2, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "", notes: "Rear and side delts." },
       { name: "Cable Chest Fly", sets: 3, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "1s squeeze at peak", notes: "Mid- or low-to-high." },
       { name: "Dips (optional finisher)", sets: 2, repsLow: 0, repsHigh: 0, restSec: 0, isCompound: false, rirHint: "AMRAP", notes: "", optional: true }
-    ]
+    ],
+    hasCore: true
   },
   pullB: {
     name: "Pull B",
@@ -1487,11 +1470,11 @@ const PLAN = {
       { name: "Seated Cable Row (close grip)", sets: 3, repsLow: 8, repsHigh: 12, restSec: 120, isCompound: true, rirHint: "1s squeeze", notes: "" },
       { name: "Straight-Arm Lat Pulldown", sets: 3, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Lat isolation", notes: "Full stretch at top." },
       { name: "Face Pull", sets: 2, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Shoulder health", notes: "Rope, high. External rotation." },
+      { name: "Cable Lateral Raise", sets: 3, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "Cable behind the back, lead with the elbow. Constant tension beats a DB here." },
       { name: "Bayesian Curl", sets: 2, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Burnout", notes: "Cable from behind you, lean away — deep stretch at the bottom." },
       { name: "Preacher Curl", sets: 3, repsLow: 8, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "Slow eccentric", notes: "Machine or DB." },
       { name: "Romanian Deadlift", sets: 2, repsLow: 8, repsHigh: 12, restSec: 120, isCompound: true, rirHint: "RIR 1-2 (controlled)", notes: "Hamstring stretch focus. Hinge and brace with exhale through pursed lips. Light-to-moderate — don't chase failure here." }
-    ],
-    hasCore: true
+    ]
   }
 };
 
@@ -1541,7 +1524,8 @@ const EX_SVG = {
   face_pull: `<svg ${SVG_BASE}><circle cx="30" cy="20" r="3.5"/><line x1="30" y1="24" x2="30" y2="42"/><line x1="30" y1="42" x2="24" y2="54"/><line x1="30" y1="42" x2="36" y2="54"/><line x1="28" y1="22" x2="14" y2="14"/><line x1="32" y1="22" x2="46" y2="14"/><line x1="14" y1="14" x2="8" y2="10"/><line x1="46" y1="14" x2="52" y2="10"/><circle cx="6" cy="10" r="2" fill="currentColor"/><circle cx="54" cy="10" r="2" fill="currentColor"/></svg>`,
   cable_curl: `<svg ${SVG_BASE}><circle cx="30" cy="14" r="3.5"/><line x1="30" y1="18" x2="30" y2="40"/><line x1="30" y1="40" x2="24" y2="52"/><line x1="30" y1="40" x2="36" y2="52"/><line x1="28" y1="22" x2="18" y2="30"/><line x1="18" y1="30" x2="22" y2="22"/><line x1="32" y1="22" x2="42" y2="30"/><line x1="42" y1="30" x2="38" y2="22"/><line x1="18" y1="30" x2="14" y2="54"/><line x1="42" y1="30" x2="46" y2="54"/></svg>`,
   cable_lateral: `<svg ${SVG_BASE}><circle cx="30" cy="14" r="3.5"/><line x1="30" y1="18" x2="30" y2="40"/><line x1="30" y1="40" x2="24" y2="52"/><line x1="30" y1="40" x2="36" y2="52"/><line x1="28" y1="22" x2="42" y2="28"/><line x1="42" y1="28" x2="50" y2="54"/><circle cx="44" cy="29" r="2.5" fill="currentColor"/><path d="M28 22 L20 22" stroke-width="1.2" opacity="0.4"/></svg>`,
-  y_raise: `<svg ${SVG_BASE}><circle cx="30" cy="20" r="3.5"/><line x1="30" y1="24" x2="30" y2="42"/><line x1="30" y1="42" x2="24" y2="54"/><line x1="30" y1="42" x2="36" y2="54"/><line x1="28" y1="26" x2="14" y2="10"/><line x1="32" y1="26" x2="46" y2="10"/><circle cx="11" cy="8" r="2.5" fill="currentColor"/><circle cx="49" cy="8" r="2.5" fill="currentColor"/></svg>`
+  y_raise: `<svg ${SVG_BASE}><circle cx="30" cy="20" r="3.5"/><line x1="30" y1="24" x2="30" y2="42"/><line x1="30" y1="42" x2="24" y2="54"/><line x1="30" y1="42" x2="36" y2="54"/><line x1="28" y1="26" x2="14" y2="10"/><line x1="32" y1="26" x2="46" y2="10"/><circle cx="11" cy="8" r="2.5" fill="currentColor"/><circle cx="49" cy="8" r="2.5" fill="currentColor"/></svg>`,
+  band_work: `<svg ${SVG_BASE}><ellipse cx="30" cy="30" rx="17" ry="9" stroke-width="2.2"/><circle cx="18" cy="44" r="3.5"/><circle cx="42" cy="44" r="3.5"/><line x1="18" y1="47" x2="18" y2="53"/><line x1="42" y1="47" x2="42" y2="53"/><path d="M13 30 L8 22 M47 30 L52 22" stroke-width="1.3"/></svg>`
 };
 
 // Map exercise names to SVG keys
@@ -1567,6 +1551,8 @@ const EX_PATTERN = {
   "Leg Extension": "leg_extension",
   "Standing Calf Raise": "calf_raise",
   "Seated Calf Raise": "calf_raise",
+  "Cable Lateral Raise": "cable_lateral",
+  "Band Work \u2014 Hips & Running Support": "band_work",
   "Machine Chest Press / Smith Bench": "smith_bench",
   "Barbell or Smith Bench (flat)": "smith_bench",
   "Smith Bench Press (flat)": "smith_bench",
@@ -1610,15 +1596,15 @@ const CORE = [
   "Weighted Russian Twist (2 × 12/side) — rotation; hold a DB or plate, controlled tempo",
   "Plank (1 × max time) — anti-extension; hold to failure, add a plate on your back to progress"
 ];
-// Friday (Pull B) swaps the Russian Twist for the Dragon Flag.
-const CORE_FRIDAY = [
+// Thursday (Push B) swaps the Russian Twist for the Dragon Flag.
+const CORE_B = [
   "Hanging Leg Raise (3 × 8–12) — anti-extension; hold a DB between the feet to load",
   "Weighted Suitcase Carry (2 × 30–40 yd/side) — anti-lateral flexion; one heavy DB, brace and walk tall",
   "Dragon Flag (3 × 5–8) — full-body anti-extension; Bruce Lee classic, lower slow and fully controlled",
   "Plank (1 × max time) — anti-extension; hold to failure, add a plate on your back to progress"
 ];
 function coreForDay(dayKey) {
-  return dayKey === "pullB" ? CORE_FRIDAY : CORE;
+  return dayKey === "pushB" ? CORE_B : CORE;
 }
 
 // ============================================================================
@@ -2555,109 +2541,67 @@ function discardWorkout() {
 let activeView = "today";          // which tab is showing (for day-rollover refresh)
 let lastRenderDay = null;          // local date the active view was last rendered
 
-let timerState = {
-  endTime: 0,      // wall-clock ms (Date.now) when the rest period ends
-  target: 0,       // total seconds (for the "Target" label)
-  intervalId: null,
-  active: false,
-  finished: false  // guard so the buzz/flash fires only once
-};
-
-function timerRemaining() {
-  return Math.max(0, Math.round((timerState.endTime - Date.now()) / 1000));
-}
-
-function startTimer(seconds) {
-  timerState.target = seconds;
-  timerState.endTime = Date.now() + seconds * 1000;   // anchored to the real clock
-  timerState.active = true;
-  timerState.finished = false;
-
-  const overlay = document.getElementById("timerOverlay");
-  overlay.classList.add("show");
-  overlay.classList.remove("done", "flash");
-  document.getElementById("timerTarget").textContent = "Target: " + fmtMMSS(seconds);
-  updateTimerDisplay();
-
-  if (timerState.intervalId) clearInterval(timerState.intervalId);
-  timerState.intervalId = setInterval(tickTimer, 250);
-  acquireWakeLock();
-}
-
-function tickTimer() {
-  if (!timerState.active) return;
-  updateTimerDisplay();
-  if (timerRemaining() <= 0) finishTimer();
-}
-
-function updateTimerDisplay() {
-  const el = document.getElementById("timerDisplay");
-  if (el) el.textContent = fmtMMSS(timerRemaining());
-}
-
-function finishTimer() {
-  if (timerState.finished) return;   // fire once only
-  timerState.finished = true;
-  if (timerState.intervalId) clearInterval(timerState.intervalId);
-  timerState.intervalId = null;
-  timerState.active = false;
-  updateTimerDisplay();
-
-  const overlay = document.getElementById("timerOverlay");
-  overlay.classList.add("done", "flash");
-  vibrate([300, 100, 300, 100, 300]);
-
-  releaseWakeLock();
-  setTimeout(() => {
-    overlay.classList.remove("show", "flash", "done");
-  }, 2000);
-}
-
-function skipTimer() {
-  if (timerState.intervalId) clearInterval(timerState.intervalId);
-  timerState.intervalId = null;
-  timerState.active = false;
-  timerState.finished = true;
-  releaseWakeLock();
-  document.getElementById("timerOverlay").classList.remove("show", "done", "flash");
-}
-
-function addTime() {
-  timerState.endTime += 30000;
-  timerState.target += 30;
-  document.getElementById("timerTarget").textContent = "Target: " + fmtMMSS(timerState.target);
-  updateTimerDisplay();
-}
-
-// Keep the screen awake while a rest timer runs so the buzz/flash fires on
-// time (otherwise iOS may sleep the screen and suspend the page). Auto-released
-// by the OS when the app is hidden; we re-acquire on return if still resting.
-let wakeLock = null;
-async function acquireWakeLock() {
-  try {
-    if ("wakeLock" in navigator) wakeLock = await navigator.wakeLock.request("screen");
-  } catch (e) { /* not supported or denied — timer still reconciles on return */ }
-}
-function releaseWakeLock() {
-  try { if (wakeLock) wakeLock.release(); } catch (e) {}
-  wakeLock = null;
-}
-
-// When the app/screen comes back to the foreground, reconcile against the real
-// clock: JS pauses while backgrounded, so recompute from endTime and fire the
-// alert immediately if the rest period elapsed while we were away.
-function reconcileTimer() {
-  if (!timerState.active) return;
-  updateTimerDisplay();
-  if (timerRemaining() <= 0) finishTimer();
-  else acquireWakeLock();
-}
-
 // PWAs stay suspended for days: a view rendered "yesterday" still shows
 // yesterday's date, recommended lift, and check-in form. On return, if the
 // calendar day changed, re-render the active view fresh.
+// ============================================================================
+// REST CLOCK — counts UP from the last logged set. Wall-clock based, so the
+// elapsed time stays correct while the screen is off (iOS suspends JS, but the
+// value is recomputed from Date.now() the moment you look at it again).
+// Colour only: no sound, no flashing.
+//   > 30s under target ......... red
+//   30s to 15s under target .... yellow
+//   within 15s of target ....... green
+//   15s to 30s over target ..... yellow
+//   > 30s over target .......... red
+// ============================================================================
+let restClock = { startedAt: null, intervalId: null };
+
+function restBandClass(elapsed, target) {
+  if (!target) return "rb-idle";
+  const diff = elapsed - target;
+  if (diff < -30) return "rb-red";
+  if (diff < -15) return "rb-yellow";
+  if (diff <= 15) return "rb-green";
+  if (diff <= 30) return "rb-yellow";
+  return "rb-red";
+}
+
+function startRestClock() {
+  restClock.startedAt = Date.now();
+  if (restClock.intervalId) clearInterval(restClock.intervalId);
+  restClock.intervalId = setInterval(tickRestClock, 1000);
+  tickRestClock();
+}
+
+function stopRestClock() {
+  if (restClock.intervalId) clearInterval(restClock.intervalId);
+  restClock.intervalId = null;
+  restClock.startedAt = null;
+}
+
+function tickRestClock() {
+  const bands = document.querySelectorAll("[data-restband]");
+  if (!bands.length) return;
+  if (restClock.startedAt == null) {
+    bands.forEach(b => {
+      b.className = "rest-band rb-idle";
+      b.querySelector(".rb-elapsed").textContent = "--:--";
+    });
+    return;
+  }
+  const elapsed = Math.floor((Date.now() - restClock.startedAt) / 1000);
+  bands.forEach(b => {
+    const target = parseInt(b.dataset.restband) || 0;
+    b.className = "rest-band " + restBandClass(elapsed, target);
+    b.querySelector(".rb-elapsed").textContent = fmtMMSS(elapsed);
+  });
+  // Keep the clock alive only while a workout is on screen
+  if (!state.current && restClock.intervalId) stopRestClock();
+}
+
 function onAppForeground() {
-  reconcileTimer();
+  tickRestClock();
   if (todayIsoDate() !== lastRenderDay) {
     lastRenderDay = todayIsoDate();
     switchView(activeView);
@@ -2667,8 +2611,6 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) onAp
 window.addEventListener("focus", onAppForeground);
 window.addEventListener("pageshow", onAppForeground);
 
-document.getElementById("timerSkip").addEventListener("click", skipTimer);
-document.getElementById("timerAdd").addEventListener("click", addTime);
 
 // ============================================================================
 // VIEW: TODAY
@@ -2808,8 +2750,12 @@ function renderActiveWorkout(cont) {
 
     ${PLAN[w.dayKey] && PLAN[w.dayKey].hasCore ? `
       <div class="card">
-        <div class="card-title">Core Work <span style="color: var(--text-dim); letter-spacing: 0; text-transform: none; font-weight: 500;">· ~10 min</span></div>
-        <div class="small" style="margin-bottom: 10px;">Tap to check off. Loaded & bodyweight — anti-extension, carries, rotation.</div>
+        <details class="sect-collapse">
+          <summary>
+            <span class="card-title" style="margin:0;">Core Work <span style="color: var(--text-dim); letter-spacing: 0; text-transform: none; font-weight: 500;">· ~10 min · ${coreForDay(w.dayKey).filter(c => w.core && w.core[c]).length}/${coreForDay(w.dayKey).length}</span></span>
+            <span class="sect-chev">▾</span>
+          </summary>
+        <div class="small" style="margin:8px 0 10px;">Tap to check off. Loaded & bodyweight — anti-extension, carries, rotation.</div>
         <div class="stretches-list">
           ${coreForDay(w.dayKey).map((c, i) => `
             <label class="stretch-item ${w.core && w.core[c] ? 'checked' : ''}" data-core="${i}">
@@ -2819,12 +2765,17 @@ function renderActiveWorkout(cont) {
             </label>
           `).join("")}
         </div>
+        </details>
       </div>
     ` : ""}
 
     <div class="card">
-      <div class="card-title">Stretching</div>
-      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 10px;">
+      <details class="sect-collapse">
+        <summary>
+          <span class="card-title" style="margin:0;">Stretching <span style="color: var(--text-dim); letter-spacing: 0; text-transform: none; font-weight: 500;">· ${STRETCHES.filter(s => w.stretches[s]).length}/${STRETCHES.length}</span></span>
+          <span class="sect-chev">▾</span>
+        </summary>
+      <div style="display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin: 8px 0 10px;">
         <div class="small">Post-lift routine. Tap to check off.</div>
         <button class="btn btn-xs btn-ghost" id="stretchToggleAll" style="width:auto; flex-shrink:0;">${STRETCHES.every(s => w.stretches[s]) ? 'Clear all' : 'Check all'}</button>
       </div>
@@ -2837,6 +2788,7 @@ function renderActiveWorkout(cont) {
           </label>
         `).join("")}
       </div>
+      </details>
     </div>
 
     <div class="card">
@@ -2858,6 +2810,7 @@ function renderActiveWorkout(cont) {
 
   // Wire up listeners on rendered exercises
   wireExerciseListeners();
+  tickRestClock();
   wireStretchListeners();
   wireCoreListeners();
   wireAddonsListener();
@@ -3013,6 +2966,13 @@ function renderExerciseCard(ex, idx, isCurrent) {
         </a>
       </div>
       <div class="ex-body">
+        ${def.restSec ? `
+          <div class="rest-band rb-idle" data-restband="${def.restSec}">
+            <span class="rb-label">REST</span>
+            <span class="rb-elapsed">--:--</span>
+            <span class="rb-target">target ${fmtMMSS(def.restSec)}</span>
+          </div>
+        ` : ""}
         <div class="sets-head">
           <div></div>
           <div>Weight (lb)</div>
@@ -3078,11 +3038,6 @@ function renderExerciseCard(ex, idx, isCurrent) {
           </div>
         `}
         <textarea class="ex-notes-input" placeholder="Notes (form cues, pain, swaps...)" data-notes="${idx}">${esc(ex.notes || '')}</textarea>
-        ${def.restSec ? `
-          <button class="btn btn-outline btn-sm" style="margin-top: 10px;" data-rest="${def.restSec}">
-            Start Rest Timer (${fmtMMSS(def.restSec)})
-          </button>
-        ` : ""}
       </div>
     </div>
   `;
@@ -3137,6 +3092,8 @@ function wireExerciseListeners() {
       btn.textContent = "✓";
       row.classList.add("logged");
       vibrate(40);
+      startRestClock();
+
       // Effort warning: failure belongs on the final set, not earlier ones
       if (rir === 0 && sIdx < exObj.sets.length - 1) {
         toast(`⚠ RIR 0 on set ${sIdx + 1} — save failure for the final set`);
@@ -3169,6 +3126,7 @@ function wireExerciseListeners() {
 
       if (weight && reps) {
         state.current.exercises[exIdx].dropSet = { weight, reps, rir, logged: true, skipped: false };
+        startRestClock();
         const dropCount = state.current.exercises.filter(e => e.dropSet && e.dropSet.logged).length;
         if (dropCount >= 3) {
           toast(`⚠ Drop set #${dropCount} today — keep drops to 1–2 lifts`);
@@ -3238,15 +3196,6 @@ function wireExerciseListeners() {
       state.current.exercises[idx].subTo = null;
       saveState();
       renderToday();
-    });
-  });
-
-  // Rest timer buttons
-  document.querySelectorAll("[data-rest]").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const sec = parseInt(btn.dataset.rest);
-      startTimer(sec);
     });
   });
 
@@ -4652,7 +4601,7 @@ function renderData() {
     </div>
 
     <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">
-      Lift Log · V-1.27
+      Lift Log · V-1.30
     </div>
   `;
 
