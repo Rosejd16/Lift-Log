@@ -66,7 +66,7 @@
   }
   .header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     padding: 8px 0 20px;
   }
@@ -1323,6 +1323,250 @@
     font-size: 22px;
     opacity: 0.5;
   }
+
+  /* ======================================================================
+     HEADER ⋮ + SHEETS (Settings & Data panel, Nutrition sheet)
+     ====================================================================== */
+  .header-right { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .kebab, .sheet-close {
+    width: 34px; height: 34px; flex-shrink: 0;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text-dim);
+    display: inline-flex; align-items: center; justify-content: center;
+    cursor: pointer; padding: 0;
+    font-size: 15px; font-family: inherit;
+    transition: color .15s ease, border-color .15s ease, transform .06s ease;
+  }
+  .kebab svg { width: 18px; height: 18px; fill: currentColor; }
+  .kebab:active, .sheet-close:active { transform: scale(0.94); }
+  @media (hover: hover) {
+    .kebab:hover, .sheet-close:hover { color: var(--text); border-color: var(--border-strong); }
+  }
+  .sheet-overlay {
+    position: fixed; inset: 0; z-index: 150;
+    display: none; align-items: flex-end; justify-content: center;
+    background: rgba(0,0,0,0.62);
+    -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  }
+  .sheet-overlay.show { display: flex; animation: sheetFade .18s ease; }
+  .sheet {
+    width: 100%; max-width: 560px;
+    max-height: calc(100% - var(--safe-top) - 14px);
+    display: flex; flex-direction: column;
+    background: var(--bg-elev);
+    border: 1px solid var(--border-strong); border-bottom: none;
+    border-radius: 18px 18px 0 0;
+    padding-bottom: var(--safe-bottom);
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.5);
+    animation: sheetUp .22s cubic-bezier(.2,.8,.2,1);
+  }
+  .sheet.tall { height: calc(100% - var(--safe-top) - 14px); }
+  .sheet-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 18px 12px;
+    border-bottom: 1px solid var(--border);
+  }
+  .sheet-title { font-size: 13px; font-weight: 700; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text); }
+  .sheet-head .small { margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sheet-body {
+    flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    padding: 16px 18px 24px;
+  }
+  body.sheet-open { overflow: hidden; }
+  @keyframes sheetUp { from { transform: translateY(36px); opacity: .6; } to { transform: none; opacity: 1; } }
+  @keyframes sheetFade { from { background: rgba(0,0,0,0); } to { background: rgba(0,0,0,0.62); } }
+  @media (min-width: 700px) {
+    .sheet-overlay { align-items: center; padding: 24px; }
+    .sheet {
+      border-radius: 18px; border-bottom: 1px solid var(--border-strong);
+      max-height: 86vh; padding-bottom: 0;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+    }
+    .sheet.tall { height: 86vh; }
+  }
+
+  /* ======================================================================
+     NUTRITION
+     ====================================================================== */
+  .nut-datebar { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: -4px 0 16px; }
+  .nut-dnav {
+    width: 38px; height: 38px; flex-shrink: 0;
+    border-radius: 10px; border: 1px solid var(--border);
+    background: var(--bg-elev); color: var(--text);
+    font-size: 22px; line-height: 1; cursor: pointer; font-family: inherit;
+  }
+  .nut-dnav:disabled { opacity: .25; cursor: default; }
+  .nut-dlabel {
+    flex: 1; min-width: 0; background: none; border: none; color: var(--text);
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    cursor: pointer; font-family: inherit; padding: 2px 0;
+  }
+  .nut-dlabel:disabled { cursor: default; }
+  .nut-dword { font-size: 15px; font-weight: 700; }
+  .nut-dfull { font-size: 11px; color: var(--text-muted); letter-spacing: 0.04em; }
+  .nt-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+  .nt-label { font-size: 11px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+  .nt-num { font-size: 13px; color: var(--text-dim); white-space: nowrap; }
+  .nt-num b { font-size: 24px; color: var(--text); font-weight: 700; }
+  .nt-goal {
+    background: none; border: none; padding: 0 1px; cursor: pointer;
+    color: var(--accent); font: inherit; font-weight: 700;
+    border-bottom: 1px dashed rgba(245,158,11,0.55);
+  }
+  .nt-bar { height: 10px; background: var(--bg-elev); border: 1px solid var(--border); border-radius: 6px; overflow: hidden; margin: 8px 0 5px; }
+  .nt-fill { height: 100%; border-radius: 6px; background: var(--accent); transition: width .3s ease, background-color .3s ease; }
+  .nt-fill.ok   { background: var(--success); }
+  .nt-fill.warn { background: var(--warn); }
+  .nt-fill.over { background: var(--danger); }
+  .nt-fill.pro  { background: #60a5fa; }
+  .nt-sub { font-size: 11.5px; color: var(--text-muted); text-align: right; margin-bottom: 14px; }
+  .nt-macros {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    padding-top: 14px; border-top: 1px solid var(--border);
+  }
+  .nt-m .lbl { font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; }
+  .nt-m .val { font-size: 18px; font-weight: 700; margin: 3px 0 5px; }
+  .nt-m .val span { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+  .nt-m .mbar { height: 4px; background: var(--bg-elev); border-radius: 3px; overflow: hidden; }
+  .nt-m .mbar div { height: 100%; background: #8b8b95; border-radius: 3px; transition: width .3s ease; }
+  .nt-m .rec { font-size: 10.5px; color: var(--text-muted); margin-top: 5px; }
+  .nt-m .rec.above { color: #fcd34d; }
+  .phase-btn .phase-kcal { display: block; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 600; opacity: 0.75; margin-top: 3px; }
+
+  .nut-sec-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+  .nut-add { width: auto; flex-shrink: 0; }
+  .nut-items { margin-top: 12px; border-top: 1px solid var(--border); }
+  .swipe-row { position: relative; overflow: hidden; border-bottom: 1px solid var(--border); }
+  .swipe-row:last-child { border-bottom: none; }
+  .swipe-del {
+    position: absolute; top: 0; right: 0; bottom: 0; width: 84px;
+    border: none; background: var(--danger); color: #fff;
+    font-family: inherit; font-weight: 700; font-size: 13px; cursor: pointer;
+  }
+  .swipe-fg {
+    position: relative; z-index: 1;
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 2px; background: var(--surface);
+    cursor: pointer; touch-action: pan-y;
+    transition: transform .2s ease;
+  }
+  .swipe-row.open .swipe-fg { transform: translateX(-84px); }
+  .ni-main { flex: 1; min-width: 0; }
+  .ni-name { font-size: 14.5px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ni-sub { font-size: 11px; color: var(--text-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ni-kcal { font-size: 14px; font-weight: 700; color: var(--text-dim); flex-shrink: 0; }
+  .ni-meal {
+    display: inline-block; vertical-align: 1px;
+    font-size: 8.5px; font-weight: 800; letter-spacing: 0.1em;
+    color: #1a1100; background: var(--accent); border-radius: 4px; padding: 1px 5px;
+  }
+  .item-x {
+    display: none; flex-shrink: 0;
+    width: 28px; height: 28px; border-radius: 8px;
+    border: 1px solid var(--border-strong); background: transparent;
+    color: var(--text-muted); font-size: 13px; cursor: pointer;
+    align-items: center; justify-content: center; padding: 0; font-family: inherit;
+  }
+  /* Mouse/trackpad: show a visible ✕. The swipe Delete stays behind each row
+     everywhere, so touchscreen laptops can still swipe. */
+  @media (hover: hover) and (pointer: fine) {
+    .item-x { display: inline-flex; }
+    .item-x:hover { color: #fff; background: var(--danger); border-color: var(--danger); }
+  }
+  .nut-repeat {
+    display: block; width: 100%; margin-top: 12px;
+    background: none; border: 1px dashed var(--border-strong); border-radius: 10px;
+    color: var(--text-dim); font-family: inherit; font-size: 12.5px; font-weight: 600;
+    padding: 10px; cursor: pointer; text-align: center;
+  }
+  .nut-repeat .mono { color: var(--text-muted); }
+  @media (hover: hover) { .nut-repeat:hover { border-color: var(--accent); color: var(--accent); } }
+
+  /* ---- nutrition sheet ---- */
+  .ns-tabs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 14px; }
+  .ns-tab {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--text-muted); border-radius: 10px; padding: 9px 2px;
+    font-family: inherit; font-size: 12.5px; font-weight: 700; cursor: pointer;
+  }
+  .ns-tab.active { color: var(--accent); border-color: var(--accent); background: rgba(245,158,11,0.1); }
+  .nut-input {
+    width: 100%; background: var(--surface); border: 1px solid var(--border);
+    color: var(--text); font-family: inherit; font-size: 16px;
+    padding: 11px 12px; border-radius: 10px; -webkit-appearance: none; appearance: none;
+  }
+  .nut-input:focus { outline: none; border-color: var(--accent); }
+  .ns-inline { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ns-inline .nut-input { flex: 1; min-width: 0; }
+  .ns-inline .btn { width: auto; flex-shrink: 0; }
+  .ns-list { margin-top: 8px; }
+  .ns-item { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--border); }
+  .ns-item-main {
+    flex: 1; min-width: 0; text-align: left;
+    background: none; border: none; color: var(--text);
+    padding: 11px 0; cursor: pointer; font-family: inherit;
+  }
+  .ns-plus {
+    width: 40px; height: 40px; flex-shrink: 0;
+    border-radius: 10px; border: none; background: var(--accent); color: #1a1100;
+    font-size: 22px; font-weight: 700; cursor: pointer; font-family: inherit;
+    transition: background-color .15s ease, transform .06s ease;
+  }
+  .ns-plus:active { transform: scale(0.92); }
+  .ns-plus.added { background: var(--success); }
+  .ns-chev { color: var(--text-muted); font-size: 20px; padding: 0 4px; }
+  .ns-empty { text-align: center; color: var(--text-muted); font-size: 13px; line-height: 1.5; padding: 22px 8px; }
+  .ns-hint { text-align: center; margin-top: 12px; }
+  .ns-back { background: none; border: none; color: var(--accent); font-family: inherit; font-size: 13px; font-weight: 600; padding: 0 0 12px; cursor: pointer; }
+  .ns-danger { color: var(--danger); }
+  .pv-name { font-size: 17px; font-weight: 700; line-height: 1.3; }
+  .pv-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 2px; }
+  .pv-chip {
+    background: var(--surface); border: 1px solid var(--border-strong);
+    color: var(--text-dim); border-radius: 20px; padding: 7px 12px;
+    font-family: inherit; font-size: 12.5px; font-weight: 600; cursor: pointer;
+  }
+  .pv-macros {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; text-align: center;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 6px; margin: 12px 0 14px;
+  }
+  .pv-macros .v { font-size: 16px; font-weight: 700; }
+  .pv-macros .l { font-size: 9.5px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted); margin-top: 2px; }
+  .pv-save { display: flex; align-items: center; gap: 9px; font-size: 13.5px; color: var(--text-dim); margin-bottom: 14px; cursor: pointer; }
+  .pv-save input { width: 18px; height: 18px; accent-color: var(--accent); }
+  .mf-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 10px 0 14px; }
+  .mf-wide { grid-column: 1 / -1; }
+  .mb-total {
+    position: sticky; top: -16px; z-index: 2;
+    background: var(--bg-elev); color: var(--accent);
+    font-size: 12px; font-weight: 600; padding: 10px 0; margin-bottom: 4px;
+    border-bottom: 1px solid var(--border);
+  }
+  .mb-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .mb-row.on .ni-name { color: var(--accent); }
+  .mb-info { flex: 1; min-width: 0; }
+  .mb-step { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .mb-step button {
+    width: 34px; height: 34px; border-radius: 9px;
+    border: 1px solid var(--border-strong); background: var(--surface);
+    color: var(--text); font-size: 18px; cursor: pointer; font-family: inherit;
+  }
+  .mb-step span { min-width: 30px; text-align: center; font-weight: 700; }
+  .qty-step { display: grid; grid-template-columns: 52px 1fr 52px; gap: 8px; }
+  .qty-step .btn { padding: 0; font-size: 22px; }
+  .eq-comp {
+    margin-top: 10px; padding: 10px 12px; background: var(--surface);
+    border: 1px solid var(--border); border-radius: 10px;
+    font-size: 13px; line-height: 1.6; color: var(--text-dim);
+  }
+  .eq-comp span { color: var(--text-muted); font-size: 11.5px; }
+  .scan-wrap { margin: 10px 0 4px; }
+  #nutScanner { width: 100%; border-radius: 12px; overflow: hidden; background: #000; min-height: 220px; }
+  #nutScanner video { border-radius: 12px; }
 </style>
 </head>
 <body>
@@ -1332,7 +1576,7 @@
   <div id="view-today" class="view active">
     <div class="header">
       <h1>Lift Log</h1>
-      <div class="date mono" id="todayDate"></div>
+      <div class="header-right"><div class="date mono" id="todayDate"></div><button class="kebab" data-settings aria-label="Settings and data"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>
     </div>
 
     <div id="todayContent"></div>
@@ -1342,7 +1586,7 @@
   <div id="view-history" class="view">
     <div class="header">
       <h1>History</h1>
-      <div class="date mono" id="historyCount"></div>
+      <div class="header-right"><div class="date mono" id="historyCount"></div><button class="kebab" data-settings aria-label="Settings and data"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>
     </div>
     <div id="historyContent"></div>
   </div>
@@ -1351,7 +1595,7 @@
   <div id="view-daily" class="view">
     <div class="header">
       <h1>Daily</h1>
-      <div class="date mono" id="dailyDate"></div>
+      <div class="header-right"><div class="date mono" id="dailyDate"></div><button class="kebab" data-settings aria-label="Settings and data"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>
     </div>
     <div id="dailyContent"></div>
   </div>
@@ -1360,18 +1604,46 @@
   <div id="view-run" class="view">
     <div class="header">
       <h1>Running</h1>
-      <div class="date mono" id="runCount"></div>
+      <div class="header-right"><div class="date mono" id="runCount"></div><button class="kebab" data-settings aria-label="Settings and data"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>
     </div>
     <div id="runContent"></div>
   </div>
 
-  <!-- ============ DATA VIEW ============ -->
-  <div id="view-data" class="view">
+  <!-- ============ NUTRITION VIEW ============ -->
+  <div id="view-nutrition" class="view">
     <div class="header">
-      <h1>Data</h1>
-      <div class="date mono" id="dataMeta"></div>
+      <h1>Nutrition</h1>
+      <div class="header-right"><div class="date mono" id="nutritionDate"></div><button class="kebab" data-settings aria-label="Settings and data"><svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="12" cy="19" r="2"/></svg></button></div>
     </div>
-    <div id="dataContent"></div>
+    <div id="nutritionContent"></div>
+  </div>
+</div>
+
+<!-- ============ SETTINGS & DATA PANEL (opened from the ⋮ on every page) ============ -->
+<div id="settingsPanel" class="sheet-overlay" aria-hidden="true">
+  <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet-head">
+      <div style="min-width:0;">
+        <div class="sheet-title" id="settingsTitle">Settings &amp; Data</div>
+        <div class="small mono" id="dataMeta"></div>
+      </div>
+      <button class="sheet-close" data-close-sheet aria-label="Close">✕</button>
+    </div>
+    <div class="sheet-body" id="dataContent"></div>
+  </div>
+</div>
+
+<!-- ============ NUTRITION SHEET (add food, meal builder, goals, entry edit) ============ -->
+<div id="nutSheet" class="sheet-overlay" aria-hidden="true">
+  <div class="sheet" id="nutSheetPanel" role="dialog" aria-modal="true" aria-labelledby="nutSheetTitle">
+    <div class="sheet-head">
+      <div style="min-width:0;">
+        <div class="sheet-title" id="nutSheetTitle"></div>
+        <div class="small mono" id="nutSheetSub"></div>
+      </div>
+      <button class="sheet-close" data-close-sheet aria-label="Close">✕</button>
+    </div>
+    <div class="sheet-body" id="nutSheetBody"></div>
   </div>
 </div>
 
@@ -1392,13 +1664,13 @@
     <svg class="nav-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
     <span class="nav-label">Daily</span>
   </button>
+  <button class="nav-item" data-view="nutrition">
+    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 7.5c-1.6-1.3-3.9-1.7-5.6-.5C4 8.7 4.3 13 6 16.4c1.4 2.8 3.4 4.6 6 3.6 2.6 1 4.6-.8 6-3.6 1.7-3.4 2-7.7-.4-9.4-1.7-1.2-4-.8-5.6.5z"/><path d="M12 7.5c0-2.2 1-3.6 3-4.5"/></svg>
+    <span class="nav-label">Nutrition</span>
+  </button>
   <button class="nav-item" data-view="history">
     <svg class="nav-icon" viewBox="0 0 24 24"><path d="M12 8v4l3 2M3 12a9 9 0 1 0 18 0 9 9 0 0 0-18 0z"/></svg>
     <span class="nav-label">History</span>
-  </button>
-  <button class="nav-item" data-view="data">
-    <svg class="nav-icon" viewBox="0 0 24 24"><path d="M3 8a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3H6a3 3 0 0 1-3-3zM7 12h10M7 8h10M7 16h6"/></svg>
-    <span class="nav-label">Data</span>
   </button>
 </nav>
 
@@ -1708,6 +1980,7 @@ function loadState() {
         if (!ex.dropSet) ex.dropSet = { weight: null, reps: null, rir: null, logged: false };
       });
     }
+    merged.nutrition = normalizeNutrition(merged.nutrition);
     return merged;
   } catch (e) {
     console.error("Load failed", e);
@@ -1723,8 +1996,10 @@ function defaultState() {
     runs: [],             // [{date, type, distance, time, notes}]
     legAlternator: "squat", // deprecated — squat & hex DL now both run every leg day
     dailyCheckins: [],    // [{date, hrv, steps, bodyBattery, sleepScore, hydration, notes}]
-    phase: "maintenance", // cutting | maintenance | bulking — adjusts stall expectations
-    garminWeeks: []       // [{weekStart:"YYYY-MM-DD" (Monday), miles}] watch-tracked mileage
+    phase: "cutting",     // cutting | maintenance | bulking — set on the Nutrition tab; drives the
+                          // calorie target AND the History effort card's stall expectations
+    garminWeeks: [],      // [{weekStart:"YYYY-MM-DD" (Monday), miles}] watch-tracked mileage
+    nutrition: defaultNutrition() // food log, library, saved meals, targets (Nutrition tab)
   };
 }
 
@@ -2603,6 +2878,7 @@ function tickRestClock() {
 function onAppForeground() {
   tickRestClock();
   if (todayIsoDate() !== lastRenderDay) {
+    if (nutDate === lastRenderDay) nutDate = null;   // was viewing "today" → follow to the new day
     lastRenderDay = todayIsoDate();
     switchView(activeView);
   }
@@ -3942,15 +4218,6 @@ function renderDaily() {
     </div>
 
     <div class="card">
-      <div class="card-title">Training Phase</div>
-      <div class="phase-row">
-        ${[["cutting","Cutting"],["maintenance","Maintenance"],["bulking","Bulking"]].map(([id,label]) => `
-          <button class="phase-btn ${(state.phase || "maintenance") === id ? 'active' : ''}" data-phase="${id}">${label}</button>
-        `).join("")}
-      </div>
-    </div>
-
-    <div class="card">
       <div class="card-title">Morning Check-In</div>
       <div class="form-row">
         <div style="grid-column: 1 / -1;">
@@ -4114,15 +4381,6 @@ function renderDaily() {
   document.getElementById("ciDate").addEventListener("change", refreshCiButton);
 
   // Save button
-  document.querySelectorAll("[data-phase]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      state.phase = btn.dataset.phase;
-      saveState();
-      renderDaily();
-      toast(`Phase set: ${btn.dataset.phase}`);
-    });
-  });
-
   document.getElementById("ciSave").addEventListener("click", () => {
     const date = document.getElementById("ciDate").value;
     if (!date) { toast("Pick a date"); return; }
@@ -4601,7 +4859,7 @@ function renderData() {
     </div>
 
     <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">
-      Lift Log · V-1.30
+      Lift Log · V-1.31
     </div>
   `;
 
@@ -4641,6 +4899,7 @@ function renderData() {
     saveState();
     renderData();
     renderToday();
+    refreshActiveView();
     toast("All data cleared");
   });
 }
@@ -4726,16 +4985,1061 @@ function importJSON(e) {
       const data = JSON.parse(ev.target.result);
       if (!confirm("Replace current data with imported file?")) return;
       state = { ...defaultState(), ...data };
+      state.nutrition = normalizeNutrition(state.nutrition);
       saveState();
       toast("Data imported");
       renderData();
       renderToday();
+      refreshActiveView();
     } catch (err) {
       toast("Invalid file");
     }
   };
   reader.readAsText(file);
 }
+
+// ============================================================================
+// NUTRITION — strictly food tracking (bodyweight stays in the Daily check-in).
+// Everything lives in state.nutrition, so it rides along in JSON export/import.
+//   log:     { "YYYY-MM-DD": { breakfast:[], lunch:[], dinner:[], snacks:[] } }
+//   entry:   { id, kind:"food"|"meal", name, serving, qty, cal, p, c, f, s, components? }
+//            cal/p/c/f/s are per ONE serving; day totals = value × qty
+//   library: [{ id, name, serving, cal, p, c, f, s, source, barcode?, lastUsed }]
+//   meals:   [{ id, name, items:[{ foodId, name, serving, qty, cal, p, c, f, s }], lastUsed }]
+// The phase (state.phase) is shared with the History effort card.
+// ============================================================================
+const NUT_SECTIONS = [
+  { id: "breakfast", label: "Breakfast" },
+  { id: "lunch", label: "Lunch" },
+  { id: "dinner", label: "Dinner" },
+  { id: "snacks", label: "Snacks" }
+];
+const NUT_PHASES = [
+  { id: "cutting", label: "Cutting", def: 1900 },
+  { id: "maintenance", label: "Maintenance", def: 2500 },
+  { id: "bulking", label: "Bulking", def: 2900 }
+];
+const NUT_PROTEIN_DEFAULT = 190;
+const NS_TABS = [["library", "Library"], ["meals", "Meals"], ["search", "Search"], ["manual", "Manual"]];
+const OFF_BASE = "https://world.openfoodfacts.org";
+const OFF_FIELDS = "code,product_name,product_name_en,generic_name,brands,nutriments,serving_size,serving_quantity";
+const SCANNER_SRC = "https://cdn.jsdelivr.net/npm/html5-qrcode@2.3.8/html5-qrcode.min.js";
+
+// NOTE: called by loadState() before this block's consts exist — keep literal.
+function defaultNutrition() {
+  return {
+    calTargets: { cutting: 1900, maintenance: 2500, bulking: 2900 },
+    proteinTarget: 190,
+    library: [],
+    meals: [],
+    log: {}
+  };
+}
+function normalizeNutrition(n) {
+  const d = defaultNutrition();
+  if (!n || typeof n !== "object") return d;
+  return {
+    calTargets: { ...d.calTargets, ...(n.calTargets && typeof n.calTargets === "object" ? n.calTargets : {}) },
+    proteinTarget: Number(n.proteinTarget) > 0 ? Number(n.proteinTarget) : d.proteinTarget,
+    library: Array.isArray(n.library) ? n.library : [],
+    meals: Array.isArray(n.meals) ? n.meals : [],
+    log: n.log && typeof n.log === "object" ? n.log : {}
+  };
+}
+
+let nutDate = null;       // ISO date shown on the Nutrition tab (null → today)
+let ns = {};              // state of the nutrition sheet
+let nutLastTab = null;    // remember the last add-sheet tab between opens
+
+// ---------- small helpers ----------
+function nutUid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 7); }
+function r1(x) { return Math.round((Number(x) || 0) * 10) / 10; }
+function nutFmt(n) { return Math.round(Number(n) || 0).toLocaleString(); }
+function nutQty(q) { return String(Math.round((Number(q) || 0) * 100) / 100); }
+function blankDay() { return { breakfast: [], lunch: [], dinner: [], snacks: [] }; }
+function secLabel(id) { return (NUT_SECTIONS.find(s => s.id === id) || {}).label || ""; }
+function currentPhase() { return NUT_PHASES.find(p => p.id === state.phase) || NUT_PHASES[0]; }
+function calGoal() {
+  const ph = currentPhase();
+  return Number(state.nutrition.calTargets[ph.id]) || ph.def;
+}
+function proteinGoal() { return Number(state.nutrition.proteinTarget) || NUT_PROTEIN_DEFAULT; }
+// Soft recommendations (not targets): fat ~27% of calories, carbs fill what
+// protein + fat leave, sugar ≤ 10% of calories.
+function macroRecs() {
+  const cal = calGoal(), pro = proteinGoal();
+  const f = Math.round(cal * 0.27 / 9);
+  const c = Math.max(0, Math.round((cal - pro * 4 - f * 9) / 4));
+  const s = Math.round(cal * 0.10 / 4);
+  return { c, f, s };
+}
+function shiftIso(iso, days) {
+  const d = parseLocalDate(iso);
+  d.setDate(d.getDate() + days);
+  return localIsoDate(d);
+}
+function nutDay(iso, create) {
+  const L = state.nutrition.log;
+  if (!L[iso]) {
+    if (!create) return null;
+    L[iso] = blankDay();
+  }
+  NUT_SECTIONS.forEach(s => { if (!Array.isArray(L[iso][s.id])) L[iso][s.id] = []; });
+  return L[iso];
+}
+function pruneDay(iso) {
+  const d = state.nutrition.log[iso];
+  if (d && NUT_SECTIONS.every(s => !(d[s.id] || []).length)) delete state.nutrition.log[iso];
+}
+function entryTotals(e) {
+  const q = Number(e.qty) || 1;
+  return { cal: (e.cal || 0) * q, p: (e.p || 0) * q, c: (e.c || 0) * q, f: (e.f || 0) * q, s: (e.s || 0) * q };
+}
+function sumEntries(list) {
+  return (list || []).reduce((t, e) => {
+    const x = entryTotals(e);
+    t.cal += x.cal; t.p += x.p; t.c += x.c; t.f += x.f; t.s += x.s;
+    return t;
+  }, { cal: 0, p: 0, c: 0, f: 0, s: 0 });
+}
+function dayTotals(iso) {
+  const d = nutDay(iso, false);
+  return d ? sumEntries(NUT_SECTIONS.flatMap(s => d[s.id])) : sumEntries([]);
+}
+function mealTotals(m) {
+  return (m.items || []).reduce((t, i) => {
+    const q = Number(i.qty) || 0;
+    t.cal += (i.cal || 0) * q; t.p += (i.p || 0) * q; t.c += (i.c || 0) * q; t.f += (i.f || 0) * q; t.s += (i.s || 0) * q;
+    return t;
+  }, { cal: 0, p: 0, c: 0, f: 0, s: 0 });
+}
+function macroLine(o) {
+  return `${nutFmt(o.cal)} kcal · P ${nutFmt(o.p)} · C ${nutFmt(o.c)} · F ${nutFmt(o.f)} · S ${nutFmt(o.s)}`;
+}
+function sortedLibrary() {
+  return [...state.nutrition.library].sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0) || String(a.name).localeCompare(String(b.name)));
+}
+// Same name + same serving = same food: update it instead of duplicating.
+function upsertLibraryFood(food) {
+  const lib = state.nutrition.library;
+  const key = String(food.name).trim().toLowerCase();
+  const existing = lib.find(x => String(x.name).trim().toLowerCase() === key && (x.serving || "") === (food.serving || ""));
+  if (existing) { Object.assign(existing, food, { id: existing.id }); return existing; }
+  const nf = { id: nutUid(), ...food };
+  lib.push(nf);
+  return nf;
+}
+
+// ---------- logging ----------
+function logEntry(secId, data) {
+  const day = nutDay(nutDate, true);
+  const e = {
+    id: nutUid(),
+    kind: data.kind || "food",
+    name: String(data.name || "Food"),
+    serving: data.serving || "",
+    qty: Number(data.qty) > 0 ? Number(data.qty) : 1,
+    cal: r1(data.cal), p: r1(data.p), c: r1(data.c), f: r1(data.f), s: r1(data.s)
+  };
+  if (data.components) e.components = data.components;
+  day[secId].push(e);
+  saveState();
+  renderNutrition();
+  updateSheetSub();
+  vibrate(20);
+  return e;
+}
+function deleteEntry(secId, id) {
+  const day = nutDay(nutDate, false);
+  if (!day) return;
+  const i = day[secId].findIndex(e => e.id === id);
+  if (i < 0) return;
+  const [gone] = day[secId].splice(i, 1);
+  pruneDay(nutDate);
+  saveState();
+  renderNutrition();
+  vibrate(20);
+  toast(`Removed ${gone.name}`);
+}
+function repeatPrevDay(secId) {
+  const prev = nutDay(shiftIso(nutDate, -1), false);
+  const items = prev ? prev[secId] : [];
+  if (!items.length) return;
+  const day = nutDay(nutDate, true);
+  items.forEach(e => day[secId].push({ ...JSON.parse(JSON.stringify(e)), id: nutUid() }));
+  saveState();
+  renderNutrition();
+  vibrate(20);
+  toast(`Added ${items.length} item${items.length === 1 ? "" : "s"} to ${secLabel(secId)}`);
+}
+
+// ---------- main view ----------
+function renderNutrition() {
+  const cont = document.getElementById("nutritionContent");
+  if (!cont) return;
+  const today = todayIsoDate();
+  if (!nutDate || nutDate > today) nutDate = today;
+  const isToday = nutDate === today;
+  const dayWord = isToday ? "Today"
+    : nutDate === shiftIso(today, -1) ? "Yesterday"
+    : parseLocalDate(nutDate).toLocaleDateString("en-US", { weekday: "long" });
+  document.getElementById("nutritionDate").textContent = fmtDate(nutDate);
+
+  const t = dayTotals(nutDate);
+  const goal = calGoal(), pro = proteinGoal(), rec = macroRecs();
+  const ph = currentPhase();
+  const day = nutDay(nutDate, false) || blankDay();
+  const prev = nutDay(shiftIso(nutDate, -1), false);
+
+  // Calories: within ±5% of goal = green. Over by >5% = red when cutting or
+  // maintaining, amber when bulking (overshooting matters less there).
+  const calPct = goal ? t.cal / goal : 0;
+  let calCls = "";
+  if (calPct >= 0.95 && calPct <= 1.05) calCls = "ok";
+  else if (calPct > 1.05) calCls = ph.id === "bulking" ? "warn" : "over";
+  const calLeft = Math.round(goal - t.cal);
+  const proLeft = Math.round(pro - t.p);
+  const proCls = t.p >= pro - 5 ? "ok" : "pro";
+
+  const macro = (label, val, recVal, sym) => {
+    const pct = recVal ? Math.min(100, val / recVal * 100) : 0;
+    const above = recVal && val > recVal * 1.1;
+    return `
+      <div class="nt-m">
+        <div class="lbl">${label}</div>
+        <div class="val mono">${nutFmt(val)}<span> g</span></div>
+        <div class="mbar"><div style="width:${pct.toFixed(1)}%"></div></div>
+        <div class="rec mono ${above ? "above" : ""}">rec ${sym}${nutFmt(recVal)} g</div>
+      </div>`;
+  };
+
+  cont.innerHTML = `
+    <div class="card nut-totals">
+      <div class="nut-datebar">
+        <button class="nut-dnav" data-act="day-prev" aria-label="Previous day">‹</button>
+        <button class="nut-dlabel" data-act="day-today" ${isToday ? "disabled" : ""} aria-label="Jump to today">
+          <span class="nut-dword">${dayWord}</span>
+          <span class="nut-dfull mono">${fmtDateLong(nutDate)}</span>
+        </button>
+        <button class="nut-dnav" data-act="day-next" aria-label="Next day" ${isToday ? "disabled" : ""}>›</button>
+      </div>
+
+      <div class="nt-row">
+        <div class="nt-label">Calories</div>
+        <div class="nt-num mono"><b>${nutFmt(t.cal)}</b> / <button class="nt-goal" data-act="edit-cal" aria-label="Edit calorie goal">${nutFmt(goal)}</button> kcal</div>
+      </div>
+      <div class="nt-bar"><div class="nt-fill ${calCls}" style="width:${Math.min(100, calPct * 100).toFixed(1)}%"></div></div>
+      <div class="nt-sub">${calLeft >= 0 ? nutFmt(calLeft) + " kcal left" : nutFmt(-calLeft) + " kcal over"} · ${ph.label}</div>
+
+      <div class="nt-row">
+        <div class="nt-label">Protein</div>
+        <div class="nt-num mono"><b>${nutFmt(t.p)}</b> / <button class="nt-goal" data-act="edit-pro" aria-label="Edit protein goal">${nutFmt(pro)}</button> g</div>
+      </div>
+      <div class="nt-bar"><div class="nt-fill ${proCls}" style="width:${Math.min(100, pro ? t.p / pro * 100 : 0).toFixed(1)}%"></div></div>
+      <div class="nt-sub">${proLeft > 0 ? proLeft + " g to go" : "Protein target hit ✓"}</div>
+
+      <div class="nt-macros">
+        ${macro("Carbs", t.c, rec.c, "~")}
+        ${macro("Fat", t.f, rec.f, "~")}
+        ${macro("Sugar", t.s, rec.s, "≤")}
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Phase</div>
+      <div class="phase-row">
+        ${NUT_PHASES.map(p => `
+          <button class="phase-btn ${p.id === ph.id ? "active" : ""}" data-act="phase" data-ph="${p.id}">${p.label}<span class="phase-kcal">${nutFmt(state.nutrition.calTargets[p.id] || p.def)}</span></button>
+        `).join("")}
+      </div>
+      <div class="small" style="margin-top: 8px; color: var(--text-dim);">Sets your calorie target and the cut/bulk read on the History effort card. Tap a goal number above to edit it.</div>
+    </div>
+
+    ${NUT_SECTIONS.map(sec => nutSectionHtml(sec, day[sec.id], prev, isToday)).join("")}
+  `;
+}
+
+function nutSectionHtml(sec, items, prev, isToday) {
+  const st = sumEntries(items);
+  const prevItems = sec.id !== "snacks" && prev ? prev[sec.id] : [];
+  return `
+    <div class="card nut-sec">
+      <div class="nut-sec-head">
+        <div style="min-width: 0;">
+          <div class="card-title" style="margin: 0;">${sec.label}</div>
+          <div class="small mono" style="margin-top: 3px;">${items.length ? `${nutFmt(st.cal)} kcal · ${nutFmt(st.p)} g protein` : "Nothing logged"}</div>
+        </div>
+        <button class="btn btn-xs nut-add" data-act="open-add" data-sec="${sec.id}">+ Add</button>
+      </div>
+      ${items.length ? `<div class="nut-items">${items.map(e => nutItemHtml(e, sec.id)).join("")}</div>` : ""}
+      ${prevItems && prevItems.length ? `
+        <button class="nut-repeat" data-act="repeat" data-sec="${sec.id}">↻ Add ${isToday ? "yesterday" : "previous day"}'s ${sec.label.toLowerCase()} <span class="mono">· ${nutFmt(sumEntries(prevItems).cal)} kcal</span></button>
+      ` : ""}
+    </div>`;
+}
+
+function nutItemHtml(e, secId) {
+  const x = entryTotals(e);
+  const q = Number(e.qty) || 1;
+  const bits = [];
+  if (e.serving) bits.push(q !== 1 ? `${nutQty(q)} × ${e.serving}` : e.serving);
+  else if (q !== 1) bits.push(`${nutQty(q)} ×`);
+  if (e.kind === "meal") bits.push(`${(e.components || []).length} items`);
+  return `
+    <div class="swipe-row" data-entry="${e.id}" data-sec="${secId}">
+      <button class="swipe-del" data-act="del" data-entry="${e.id}" data-sec="${secId}">Delete</button>
+      <div class="swipe-fg" data-act="edit-entry" data-entry="${e.id}" data-sec="${secId}">
+        <div class="ni-main">
+          <div class="ni-name">${e.kind === "meal" ? '<span class="ni-meal">MEAL</span> ' : ""}${esc(e.name)}</div>
+          <div class="ni-sub mono">${bits.length ? esc(bits.join(" · ")) + " · " : ""}P ${nutFmt(x.p)} · C ${nutFmt(x.c)} · F ${nutFmt(x.f)} · S ${nutFmt(x.s)}</div>
+        </div>
+        <div class="ni-kcal mono">${nutFmt(x.cal)}</div>
+        <button class="item-x" data-act="del" data-entry="${e.id}" data-sec="${secId}" aria-label="Delete ${esc(e.name)}">✕</button>
+      </div>
+    </div>`;
+}
+
+// ---------- main view: clicks + swipe-to-delete ----------
+function onNutritionClick(ev) {
+  const el = ev.target.closest("[data-act]");
+  if (!el) return;
+  const act = el.dataset.act, sec = el.dataset.sec, id = el.dataset.entry;
+  if (act === "edit-entry") {
+    const row = el.closest(".swipe-row");
+    if (row && (row.dataset.justSwiped || row.classList.contains("open"))) { row.classList.remove("open"); return; }
+    openEntrySheet(sec, id);
+    return;
+  }
+  if (act === "day-prev") { nutDate = shiftIso(nutDate, -1); renderNutrition(); }
+  else if (act === "day-next") { if (nutDate < todayIsoDate()) { nutDate = shiftIso(nutDate, 1); renderNutrition(); } }
+  else if (act === "day-today") { nutDate = todayIsoDate(); renderNutrition(); }
+  else if (act === "phase") {
+    state.phase = el.dataset.ph;
+    saveState();
+    renderNutrition();
+    toast(`${currentPhase().label} · ${nutFmt(calGoal())} kcal`);
+  }
+  else if (act === "edit-cal") openGoalSheet("cal");
+  else if (act === "edit-pro") openGoalSheet("pro");
+  else if (act === "open-add") openAddSheet(sec);
+  else if (act === "repeat") repeatPrevDay(sec);
+  else if (act === "del") deleteEntry(sec, id);
+}
+
+let nutSwipe = null;
+const SWIPE_OPEN = 84;
+function closeOpenSwipes(except) {
+  document.querySelectorAll("#nutritionContent .swipe-row.open").forEach(r => { if (r !== except) r.classList.remove("open"); });
+}
+function onNutTouchStart(ev) {
+  const row = ev.target.closest(".swipe-row");
+  closeOpenSwipes(row);
+  if (!row || ev.target.closest(".swipe-del")) { nutSwipe = null; return; }
+  const t = ev.touches[0];
+  nutSwipe = { row, fg: row.querySelector(".swipe-fg"), x0: t.clientX, y0: t.clientY, dx: 0, dir: null, base: row.classList.contains("open") ? -SWIPE_OPEN : 0 };
+}
+function onNutTouchMove(ev) {
+  const s = nutSwipe;
+  if (!s) return;
+  const t = ev.touches[0];
+  const dx = t.clientX - s.x0, dy = t.clientY - s.y0;
+  if (!s.dir) {
+    if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+    s.dir = Math.abs(dx) > Math.abs(dy) ? "h" : "v";
+  }
+  if (s.dir !== "h") return;
+  if (ev.cancelable) ev.preventDefault();
+  s.dx = dx;
+  const x = Math.max(-SWIPE_OPEN - 30, Math.min(0, s.base + dx));
+  s.fg.style.transition = "none";
+  s.fg.style.transform = `translateX(${x}px)`;
+}
+function onNutTouchEnd() {
+  const s = nutSwipe;
+  nutSwipe = null;
+  if (!s || s.dir !== "h") return;
+  s.fg.style.transition = "";
+  s.fg.style.transform = "";
+  s.row.classList.toggle("open", s.base + s.dx < -SWIPE_OPEN / 2);
+  s.row.dataset.justSwiped = "1";
+  setTimeout(() => { delete s.row.dataset.justSwiped; }, 350);
+}
+
+// ---------- the nutrition sheet ----------
+function setSheet(title, sub, html, tall) {
+  document.getElementById("nutSheetTitle").textContent = title;
+  document.getElementById("nutSheetSub").textContent = sub || "";
+  document.getElementById("nutSheetPanel").classList.toggle("tall", !!tall);
+  const body = document.getElementById("nutSheetBody");
+  body.innerHTML = html;
+  body.scrollTop = 0;
+}
+function sectionSummary(secId) {
+  const d = nutDay(nutDate, false);
+  const items = d ? d[secId] : [];
+  return items.length ? `${items.length} item${items.length === 1 ? "" : "s"} · ${nutFmt(sumEntries(items).cal)} kcal so far` : "Nothing logged yet";
+}
+function updateSheetSub() {
+  if (ns.mode === "add") document.getElementById("nutSheetSub").textContent = `${fmtDate(nutDate)} · ${sectionSummary(ns.section)}`;
+}
+function closeNutSheet() {
+  stopScanner();
+  closeOverlay(document.getElementById("nutSheet"));
+  ns = {};
+}
+function flashPlus(btn) {
+  if (!btn) return;
+  btn.classList.add("added");
+  btn.textContent = "✓";
+  setTimeout(() => { btn.classList.remove("added"); btn.textContent = "+"; }, 700);
+}
+
+function openAddSheet(secId) {
+  const hasLib = state.nutrition.library.length > 0;
+  ns = { mode: "add", section: secId, view: "tabs", tab: nutLastTab || (hasLib ? "library" : "search"), results: null, query: "", barcode: "" };
+  renderAddSheet();
+  openOverlay(document.getElementById("nutSheet"));
+}
+function renderAddSheet() {
+  if (nutScanner) stopScanner();
+  let title = `Add to ${secLabel(ns.section)}`, html;
+  if (ns.view === "portion") html = portionHtml();
+  else if (ns.view === "food-edit") { title = "Edit food"; html = foodEditHtml(); }
+  else if (ns.view === "meal-builder") { title = ns.draft && ns.draft.id ? "Edit meal" : "Build a meal"; html = mealBuilderHtml(); }
+  else {
+    const pane = ns.tab === "meals" ? mealsPane() : ns.tab === "search" ? searchPane() : ns.tab === "manual" ? manualPane() : libraryPane();
+    html = `<div class="ns-tabs">${NS_TABS.map(([id, l]) => `<button class="ns-tab ${ns.tab === id ? "active" : ""}" data-sact="tab" data-tab="${id}">${l}</button>`).join("")}</div>${pane}`;
+  }
+  setSheet(title, "", html, true);
+  updateSheetSub();
+}
+
+function libraryPane() {
+  const lib = sortedLibrary();
+  if (!lib.length) return `<div class="ns-empty">Your food library is empty.<br>Foods you add under <b>Manual</b> are saved here automatically, and foods from <b>Search</b> can be saved too.</div>`;
+  return `
+    <input class="nut-input" type="search" data-sinput="filter" placeholder="Filter ${lib.length} food${lib.length === 1 ? "" : "s"}" autocomplete="off">
+    <div class="ns-list">${lib.map(f => `
+      <div class="ns-item" data-name="${esc(String(f.name).toLowerCase())}">
+        <button class="ns-item-main" data-sact="edit-food" data-id="${f.id}">
+          <div class="ni-name">${esc(f.name)}</div>
+          <div class="ni-sub mono">${f.serving ? esc(f.serving) + " · " : ""}${macroLine(f)}</div>
+        </button>
+        <button class="ns-plus" data-sact="add-food" data-id="${f.id}" aria-label="Add ${esc(f.name)}">+</button>
+      </div>`).join("")}
+    </div>
+    <div class="small ns-hint">Tap + to log one serving · tap a name to edit or delete it</div>`;
+}
+
+function mealsPane() {
+  const meals = [...state.nutrition.meals].sort((a, b) => (b.lastUsed || 0) - (a.lastUsed || 0) || String(a.name).localeCompare(String(b.name)));
+  const hasLib = state.nutrition.library.length > 0;
+  return `
+    <button class="btn btn-sm btn-outline" data-sact="new-meal" ${hasLib ? "" : "disabled"}>+ Build a meal</button>
+    ${!hasLib ? `<div class="ns-empty">Meals are built from foods in your library — add a few foods first.</div>`
+      : !meals.length ? `<div class="ns-empty">No saved meals yet. Combine foods you eat together (e.g. "Usual breakfast") and log them in one tap.</div>`
+      : `<div class="ns-list">${meals.map(m => {
+          const t = mealTotals(m);
+          return `
+          <div class="ns-item">
+            <button class="ns-item-main" data-sact="edit-meal" data-id="${m.id}">
+              <div class="ni-name"><span class="ni-meal">MEAL</span> ${esc(m.name)}</div>
+              <div class="ni-sub mono">${m.items.length} item${m.items.length === 1 ? "" : "s"} · ${macroLine(t)}</div>
+            </button>
+            <button class="ns-plus" data-sact="add-meal" data-id="${m.id}" aria-label="Add ${esc(m.name)}">+</button>
+          </div>`;
+        }).join("")}</div>
+        <div class="small ns-hint">Tap + to log the whole meal · tap a name to edit or delete it</div>`}`;
+}
+
+function searchPane() {
+  return `
+    <div class="form-label">Search by name</div>
+    <div class="ns-inline">
+      <input class="nut-input" type="search" data-sinput="q" placeholder="e.g. greek yogurt" value="${esc(ns.query || "")}" autocomplete="off" enterkeyhint="search">
+      <button class="btn btn-sm" data-sact="search">Search</button>
+    </div>
+    <div class="form-label">Barcode</div>
+    <div class="ns-inline">
+      <input class="nut-input mono" type="text" inputmode="numeric" pattern="[0-9]*" data-sinput="barcode" placeholder="Type the digits" value="${esc(ns.barcode || "")}" autocomplete="off" enterkeyhint="go">
+      <button class="btn btn-sm btn-outline" data-sact="lookup">Look up</button>
+    </div>
+    <button class="btn btn-sm btn-ghost" data-sact="scan">📷 Scan barcode with camera</button>
+    <div id="nutScanWrap" class="scan-wrap" style="display: none;">
+      <div id="nutScanner"></div>
+      <button class="btn btn-sm btn-ghost" data-sact="scan-stop" style="margin-top: 8px;">Stop camera</button>
+    </div>
+    <div id="nutResults">${resultsHtml()}</div>
+    <div class="small ns-hint">Data from Open Food Facts · values are per 100 g and scaled to your portion</div>`;
+}
+function resultsHtml() {
+  if (ns.status === "loading") return `<div class="ns-empty">${esc(ns.statusMsg || "Searching Open Food Facts…")}</div>`;
+  if (ns.status === "error") return `<div class="ns-empty">${esc(ns.statusMsg)}</div>`;
+  if (!ns.results) return "";
+  if (!ns.results.length) return `<div class="ns-empty">No matches with calorie data. Try a simpler term, or add it under Manual.</div>`;
+  return `<div class="ns-list">${ns.results.map((p, i) => `
+    <div class="ns-item">
+      <button class="ns-item-main" data-sact="pick" data-i="${i}">
+        <div class="ni-name">${esc(p.name)}</div>
+        <div class="ni-sub mono">${p.brand ? esc(p.brand) + " · " : ""}${nutFmt(p.per100.cal)} kcal / 100 g${p.servingG ? " · serving " + p.servingG + " g" : ""}</div>
+      </button>
+      <span class="ns-chev">›</span>
+    </div>`).join("")}</div>`;
+}
+function setResults() {
+  const el = document.getElementById("nutResults");
+  if (el) el.innerHTML = resultsHtml();
+}
+
+function manualPane() {
+  const fld = (id, label) => `<div><div class="form-label">${label}</div><input class="nut-input mono" type="number" inputmode="decimal" step="any" min="0" id="${id}" placeholder="0"></div>`;
+  return `
+    <div class="form-label">Food name</div>
+    <input class="nut-input" type="text" id="mfName" placeholder="e.g. Overnight oats" autocomplete="off">
+    <div class="form-label" style="margin-top: 10px;">Serving (optional)</div>
+    <input class="nut-input" type="text" id="mfServ" placeholder="e.g. 1 cup, 150 g" autocomplete="off">
+    <div class="mf-grid">
+      <div class="mf-wide">${fld("mfCal", "Calories")}</div>
+      ${fld("mfP", "Protein (g)")}${fld("mfC", "Carbs (g)")}${fld("mfF", "Fat (g)")}${fld("mfS", "Sugar (g)")}
+    </div>
+    <button class="btn" data-sact="add-manual">Add to ${secLabel(ns.section)}</button>
+    <div class="small ns-hint">Saved to your food library automatically for one-tap adding later.</div>`;
+}
+
+// ---------- portion editor (search / barcode results) ----------
+function openPortion(p) {
+  ns.product = p;
+  ns.grams = p.servingG || 100;
+  ns.view = "portion";
+  renderAddSheet();
+}
+function portionCalc() {
+  const k = (Number(ns.grams) || 0) / 100, b = ns.product.per100;
+  return { cal: b.cal * k, p: b.p * k, c: b.c * k, f: b.f * k, s: b.s * k };
+}
+function macroGridHtml(v) {
+  return [["kcal", v.cal], ["Prot", v.p], ["Carb", v.c], ["Fat", v.f], ["Sugar", v.s]]
+    .map(([l, x]) => `<div><div class="v">${nutFmt(x)}</div><div class="l">${l}</div></div>`).join("");
+}
+function portionHtml() {
+  const p = ns.product;
+  return `
+    <button class="ns-back" data-sact="back">‹ Back</button>
+    <div class="pv-name">${esc(p.name)}</div>
+    <div class="small">${p.brand ? esc(p.brand) + " · " : ""}${nutFmt(p.per100.cal)} kcal per 100 g${p.code ? " · " + esc(p.code) : ""}</div>
+    <div class="form-label" style="margin-top: 14px;">Portion (grams)</div>
+    <input class="bw-input" type="number" inputmode="decimal" step="any" min="0" data-sinput="grams" value="${ns.grams}">
+    <div class="pv-chips">
+      ${p.servingG ? `<button class="pv-chip" data-sact="grams" data-g="${p.servingG}">1 serving · ${p.servingG} g</button><button class="pv-chip" data-sact="grams" data-g="${r1(p.servingG * 2)}">2 servings</button>` : ""}
+      <button class="pv-chip" data-sact="grams" data-g="100">100 g</button>
+    </div>
+    <div class="pv-macros mono" id="pvMacros">${macroGridHtml(portionCalc())}</div>
+    <label class="pv-save"><input type="checkbox" id="pvSave" checked> Save to my food library</label>
+    <button class="btn" data-sact="add-product">Add to ${secLabel(ns.section)}</button>`;
+}
+
+// ---------- library food edit ----------
+function foodEditHtml() {
+  const f = state.nutrition.library.find(x => x.id === ns.editId);
+  if (!f) return `<button class="ns-back" data-sact="back">‹ Back</button><div class="ns-empty">That food no longer exists.</div>`;
+  const fld = (id, label, val) => `<div><div class="form-label">${label}</div><input class="nut-input mono" type="number" inputmode="decimal" step="any" min="0" id="${id}" value="${val}"></div>`;
+  return `
+    <button class="ns-back" data-sact="back">‹ Back to library</button>
+    <div class="form-label">Food name</div>
+    <input class="nut-input" type="text" id="efName" value="${esc(f.name)}" autocomplete="off">
+    <div class="form-label" style="margin-top: 10px;">Serving</div>
+    <input class="nut-input" type="text" id="efServ" value="${esc(f.serving || "")}" placeholder="e.g. 1 cup" autocomplete="off">
+    <div class="mf-grid">
+      <div class="mf-wide">${fld("efCal", "Calories", r1(f.cal))}</div>
+      ${fld("efP", "Protein (g)", r1(f.p))}${fld("efC", "Carbs (g)", r1(f.c))}${fld("efF", "Fat (g)", r1(f.f))}${fld("efS", "Sugar (g)", r1(f.s))}
+    </div>
+    <button class="btn" data-sact="save-food">Save changes</button>
+    <button class="btn btn-sm btn-ghost ns-danger" data-sact="del-food" style="margin-top: 8px;">Delete from library</button>
+    <div class="small ns-hint">Days you've already logged and saved meals keep their own copy.</div>`;
+}
+
+// ---------- meal builder ----------
+function openMealBuilder(mealId) {
+  const m = mealId ? state.nutrition.meals.find(x => x.id === mealId) : null;
+  const qty = {}, orphans = [];
+  if (m) m.items.forEach(it => {
+    if (it.foodId && state.nutrition.library.some(f => f.id === it.foodId)) qty[it.foodId] = (qty[it.foodId] || 0) + (Number(it.qty) || 0);
+    else orphans.push({ ...it, _oid: nutUid() });
+  });
+  ns.draft = { id: m ? m.id : null, name: m ? m.name : "", qty, orphans };
+  ns.view = "meal-builder";
+  renderAddSheet();
+}
+function draftItems() {
+  const d = ns.draft, items = [];
+  state.nutrition.library.forEach(f => {
+    const q = d.qty[f.id];
+    if (q > 0) items.push({ foodId: f.id, name: f.name, serving: f.serving || "", qty: q, cal: f.cal, p: f.p, c: f.c, f: f.f, s: f.s });
+  });
+  d.orphans.forEach(o => {
+    if (o.qty > 0) items.push({ foodId: o.foodId || null, name: o.name, serving: o.serving || "", qty: o.qty, cal: o.cal, p: o.p, c: o.c, f: o.f, s: o.s });
+  });
+  return items;
+}
+function mbTotalHtml() {
+  const items = draftItems();
+  return items.length ? `${items.length} item${items.length === 1 ? "" : "s"} · ${macroLine(mealTotals({ items }))}` : "Tap + on foods to build the meal";
+}
+function mealBuilderHtml() {
+  const d = ns.draft, lib = sortedLibrary();
+  const row = (key, name, sub, q) => `
+    <div class="mb-row ${q > 0 ? "on" : ""}" data-name="${esc(String(name).toLowerCase())}">
+      <div class="mb-info"><div class="ni-name">${esc(name)}</div><div class="ni-sub mono">${sub}</div></div>
+      <div class="mb-step">
+        <button data-sact="mb-dec" data-key="${key}" aria-label="Less">−</button>
+        <span class="mono" data-qty="${key}">${q > 0 ? nutQty(q) : "0"}</span>
+        <button data-sact="mb-inc" data-key="${key}" aria-label="More">+</button>
+      </div>
+    </div>`;
+  return `
+    <button class="ns-back" data-sact="back">‹ Back to meals</button>
+    <div class="form-label">Meal name</div>
+    <input class="nut-input" type="text" data-sinput="mealname" placeholder="e.g. Usual breakfast" value="${esc(d.name)}" autocomplete="off">
+    <div class="mb-total mono" id="mbTotal">${mbTotalHtml()}</div>
+    ${lib.length > 8 ? `<input class="nut-input" type="search" data-sinput="filter" placeholder="Filter foods" autocomplete="off" style="margin-bottom: 4px;">` : ""}
+    <div class="ns-list">
+      ${d.orphans.map(o => row("o:" + o._oid, o.name, "removed from library · " + nutFmt(o.cal) + " kcal", o.qty)).join("")}
+      ${lib.map(f => row("f:" + f.id, f.name, `${f.serving ? esc(f.serving) + " · " : ""}${nutFmt(f.cal)} kcal`, d.qty[f.id] || 0)).join("")}
+    </div>
+    <button class="btn" data-sact="save-meal" style="margin-top: 14px;">${d.id ? "Save changes" : "Save meal"}</button>
+    ${d.id ? `<button class="btn btn-sm btn-ghost ns-danger" data-sact="del-meal" style="margin-top: 8px;">Delete meal</button>` : ""}`;
+}
+function mbStep(key, dir) {
+  const d = ns.draft;
+  const bump = q => dir > 0 ? (q === 0 ? 1 : q + 0.5) : Math.max(0, q - 0.5);
+  let q;
+  if (key.startsWith("f:")) {
+    const id = key.slice(2);
+    q = bump(d.qty[id] || 0);
+    d.qty[id] = q;
+  } else {
+    const o = d.orphans.find(x => "o:" + x._oid === key);
+    if (!o) return;
+    q = bump(Number(o.qty) || 0);
+    o.qty = q;
+  }
+  const span = document.querySelector(`#nutSheetBody [data-qty="${key}"]`);
+  if (span) {
+    span.textContent = q > 0 ? nutQty(q) : "0";
+    span.closest(".mb-row").classList.toggle("on", q > 0);
+  }
+  const tot = document.getElementById("mbTotal");
+  if (tot) tot.textContent = mbTotalHtml();
+}
+
+// ---------- logged entry edit ----------
+function openEntrySheet(secId, id) {
+  const day = nutDay(nutDate, false);
+  const e = day && day[secId].find(x => x.id === id);
+  if (!e) return;
+  ns = { mode: "entry", section: secId, entryId: id, qty: Number(e.qty) || 1 };
+  setSheet("Edit entry", `${secLabel(secId)} · ${fmtDate(nutDate)}`, `
+    <div class="pv-name">${e.kind === "meal" ? '<span class="ni-meal">MEAL</span> ' : ""}${esc(e.name)}</div>
+    <div class="small">${e.serving ? "Serving: " + esc(e.serving) : e.kind === "meal" ? "1 = the whole meal below" : "1 = one serving"}</div>
+    ${e.kind === "meal" && e.components ? `<div class="eq-comp">${e.components.map(c => `<div>${nutQty(c.qty)} × ${esc(c.name)}${c.serving ? ` <span>(${esc(c.serving)})</span>` : ""}</div>`).join("")}</div>` : ""}
+    <div class="form-label" style="margin-top: 14px;">Servings</div>
+    <div class="qty-step">
+      <button class="btn btn-ghost" data-sact="q-dec" aria-label="Less">−</button>
+      <input class="bw-input" type="number" inputmode="decimal" step="0.25" min="0" data-sinput="qty" value="${nutQty(ns.qty)}">
+      <button class="btn btn-ghost" data-sact="q-inc" aria-label="More">+</button>
+    </div>
+    <div class="pv-macros mono" id="eqMacros">${entryMacrosHtml()}</div>
+    <div class="btn-row">
+      <button class="btn btn-danger" data-sact="entry-del">Delete</button>
+      <button class="btn" data-sact="entry-save">Save</button>
+    </div>`, false);
+  openOverlay(document.getElementById("nutSheet"));
+}
+function currentEntry() {
+  const day = nutDay(nutDate, false);
+  return day ? day[ns.section].find(x => x.id === ns.entryId) : null;
+}
+function entryMacrosHtml() {
+  const e = currentEntry();
+  return e ? macroGridHtml(entryTotals({ ...e, qty: ns.qty })) : "";
+}
+function setEntryQty(q) {
+  ns.qty = Math.max(0, Math.round(q * 100) / 100);
+  const inp = document.querySelector('#nutSheetBody [data-sinput="qty"]');
+  if (inp) inp.value = nutQty(ns.qty);
+  const m = document.getElementById("eqMacros");
+  if (m) m.innerHTML = entryMacrosHtml();
+}
+
+// ---------- goal editor ----------
+function openGoalSheet(kind) {
+  const ph = currentPhase(), isCal = kind === "cal";
+  const val = isCal ? calGoal() : proteinGoal();
+  const def = isCal ? ph.def : NUT_PROTEIN_DEFAULT;
+  ns = { mode: "goal", kind };
+  setSheet(isCal ? "Calorie goal" : "Protein goal", isCal ? `${ph.label} phase` : "Daily target", `
+    <div class="form-label">${isCal ? ph.label + " target (kcal)" : "Protein target (g)"}</div>
+    <input class="bw-input" type="number" inputmode="numeric" step="1" min="0" id="goalVal" value="${val}">
+    <div class="small" style="margin: 8px 0 14px;">${isCal ? `Each phase keeps its own target. Default ${nutFmt(def)} kcal.` : "Your range is 185–200 g. Default 190 g."}</div>
+    <div class="btn-row">
+      <button class="btn btn-ghost" data-sact="goal-reset">Reset to ${nutFmt(def)}</button>
+      <button class="btn" data-sact="goal-save">Save</button>
+    </div>`, false);
+  openOverlay(document.getElementById("nutSheet"));
+}
+function saveGoal(value) {
+  const isCal = ns.kind === "cal";
+  const v = Math.round(Number(value));
+  if (isCal && !(v >= 800 && v <= 6000)) { toast("Calorie goal should be 800–6,000"); return; }
+  if (!isCal && !(v >= 40 && v <= 400)) { toast("Protein goal should be 40–400 g"); return; }
+  if (isCal) state.nutrition.calTargets[currentPhase().id] = v;
+  else state.nutrition.proteinTarget = v;
+  saveState();
+  closeNutSheet();
+  renderNutrition();
+  toast(isCal ? `${currentPhase().label} goal: ${nutFmt(v)} kcal` : `Protein goal: ${v} g`);
+}
+
+// ---------- Open Food Facts ----------
+async function offFetchJson(url) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await fetch(url, { signal: ctrl.signal });
+    if (r.status === 404) return { status: 0 };      // unknown barcode
+    if (!r.ok) throw new Error("HTTP " + r.status);
+    return await r.json();
+  } finally {
+    clearTimeout(timer);
+  }
+}
+// OFF reports nutrients per 100 g. Fall back to kJ when kcal is missing.
+function offNormalize(p) {
+  if (!p) return null;
+  const n = p.nutriments || {};
+  const num = k => { const v = parseFloat(n[k]); return isFinite(v) ? v : null; };
+  let kcal = num("energy-kcal_100g");
+  if (kcal == null) {
+    const kj = num("energy-kj_100g") != null ? num("energy-kj_100g") : num("energy_100g");
+    if (kj != null) kcal = kj / 4.184;
+  }
+  const name = String(p.product_name || p.product_name_en || p.generic_name || "").trim();
+  if (kcal == null || !name) return null;
+  let sg = parseFloat(p.serving_quantity);
+  if (!(sg > 0)) {
+    const m = String(p.serving_size || "").match(/([\d.]+)\s*(g|ml)\b/i);
+    sg = m ? parseFloat(m[1]) : null;
+  }
+  return {
+    code: String(p.code || ""),
+    name,
+    brand: String(p.brands || "").split(",")[0].trim(),
+    servingG: sg > 0 ? r1(sg) : null,
+    per100: { cal: kcal, p: num("proteins_100g") || 0, c: num("carbohydrates_100g") || 0, f: num("fat_100g") || 0, s: num("sugars_100g") || 0 }
+  };
+}
+function offErrorMsg(e) {
+  return e && e.name === "AbortError"
+    ? "Open Food Facts took too long to answer. Try again in a moment, or add it under Manual."
+    : "Couldn't reach Open Food Facts. Check your connection, or add it under Manual.";
+}
+async function nutSearch() {
+  const q = String(ns.query || "").trim();
+  if (q.length < 2) { toast("Type at least 2 letters"); return; }
+  if (document.activeElement) document.activeElement.blur();
+  stopScanner();
+  const token = ns.reqToken = nutUid();
+  ns.status = "loading"; ns.statusMsg = "Searching Open Food Facts…"; ns.results = null;
+  setResults();
+  try {
+    const j = await offFetchJson(`${OFF_BASE}/cgi/search.pl?search_terms=${encodeURIComponent(q)}&search_simple=1&action=process&json=1&page_size=24&fields=${OFF_FIELDS}`);
+    if (ns.reqToken !== token) return;
+    ns.results = (j.products || []).map(offNormalize).filter(Boolean);
+    ns.status = null;
+  } catch (e) {
+    if (ns.reqToken !== token) return;
+    ns.status = "error"; ns.statusMsg = offErrorMsg(e);
+  }
+  setResults();
+}
+async function lookupBarcode(raw) {
+  const code = String(raw || "").replace(/\D/g, "");
+  if (code.length < 6 || code.length > 14) { toast("Barcodes are 6–14 digits"); return; }
+  if (document.activeElement) document.activeElement.blur();
+  ns.barcode = code;
+  const token = ns.reqToken = nutUid();
+  ns.status = "loading"; ns.statusMsg = `Looking up ${code}…`;
+  setResults();
+  try {
+    const j = await offFetchJson(`${OFF_BASE}/api/v2/product/${code}.json?fields=${OFF_FIELDS}`);
+    if (ns.reqToken !== token) return;
+    if (!j || !j.product) {
+      ns.status = "error"; ns.statusMsg = `Barcode ${code} isn't in Open Food Facts yet. Try a name search, or add it under Manual.`;
+    } else {
+      const p = offNormalize({ code, ...j.product });
+      if (!p) {
+        ns.status = "error"; ns.statusMsg = "Found it, but Open Food Facts has no calorie data for this product. Add it under Manual.";
+      } else {
+        ns.status = null;
+        openPortion(p);
+        return;
+      }
+    }
+  } catch (e) {
+    if (ns.reqToken !== token) return;
+    ns.status = "error"; ns.statusMsg = offErrorMsg(e);
+  }
+  setResults();
+}
+
+// ---------- camera barcode scanning (html5-qrcode, loaded on first use) ----------
+let nutScanner = null, nutScanBusy = false, scannerLibPromise = null;
+function loadScannerLib() {
+  if (window.__Html5QrcodeLibrary__) return Promise.resolve(window.__Html5QrcodeLibrary__);
+  if (!scannerLibPromise) {
+    scannerLibPromise = new Promise((resolve, reject) => {
+      const s = document.createElement("script");
+      s.src = SCANNER_SRC;
+      s.async = true;
+      s.onload = () => window.__Html5QrcodeLibrary__ ? resolve(window.__Html5QrcodeLibrary__) : reject(new Error("load"));
+      s.onerror = () => { scannerLibPromise = null; s.remove(); reject(new Error("load")); };
+      document.head.appendChild(s);
+    });
+  }
+  return scannerLibPromise;
+}
+async function startScanner() {
+  if (nutScanner || nutScanBusy) return;
+  const wrap = document.getElementById("nutScanWrap");
+  if (!wrap) return;
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    toast("No camera access here — type the digits instead");
+    return;
+  }
+  nutScanBusy = true;
+  wrap.style.display = "block";
+  try {
+    const lib = await loadScannerLib();
+    if (!document.getElementById("nutScanner")) return;     // sheet changed while loading
+    const F = lib.Html5QrcodeSupportedFormats;
+    const sc = new lib.Html5Qrcode("nutScanner", {
+      verbose: false,
+      formatsToSupport: [F.EAN_13, F.EAN_8, F.UPC_A, F.UPC_E, F.CODE_128],
+      useBarCodeDetectorIfSupported: true
+    });
+    nutScanner = sc;
+    let done = false;
+    await sc.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: (w, h) => ({ width: Math.max(120, Math.floor(Math.min(w * 0.88, 340))), height: Math.max(60, Math.floor(Math.min(h * 0.45, 150))) }) },
+      async (text) => {
+        if (done) return;
+        done = true;
+        vibrate(30);
+        await stopScanner();
+        const code = String(text).replace(/\D/g, "");
+        const inp = document.querySelector('#nutSheetBody [data-sinput="barcode"]');
+        if (inp) inp.value = code;
+        lookupBarcode(code);
+      },
+      () => {}
+    );
+  } catch (e) {
+    await stopScanner();
+    toast(e && e.message === "load" ? "Scanner didn't load — type the digits instead" : "Couldn't start the camera — check camera permission, or type the digits");
+  } finally {
+    nutScanBusy = false;
+  }
+}
+async function stopScanner() {
+  const sc = nutScanner;
+  nutScanner = null;
+  const wrap = document.getElementById("nutScanWrap");
+  if (wrap) wrap.style.display = "none";
+  if (!sc) return;
+  try { if (sc.isScanning) await sc.stop(); } catch (e) { /* already stopped */ }
+  try { sc.clear(); } catch (e) { /* element gone */ }
+}
+
+// ---------- sheet: clicks ----------
+function readNum(id) {
+  const el = document.getElementById(id);
+  if (!el || el.value.trim() === "") return null;
+  const v = parseFloat(el.value);
+  return isFinite(v) && v >= 0 ? v : NaN;
+}
+function onNutSheetClick(ev) {
+  const el = ev.target.closest("[data-sact]");
+  if (!el) return;
+  const a = el.dataset.sact;
+  const lib = state.nutrition.library;
+
+  if (a === "tab") { ns.tab = el.dataset.tab; nutLastTab = ns.tab; ns.view = "tabs"; renderAddSheet(); }
+  else if (a === "back") {
+    ns.view = "tabs";
+    if (ns.product) ns.tab = "search";
+    renderAddSheet();
+  }
+  else if (a === "add-food") {
+    const f = lib.find(x => x.id === el.dataset.id);
+    if (!f) return;
+    f.lastUsed = Date.now();
+    logEntry(ns.section, { kind: "food", name: f.name, serving: f.serving, cal: f.cal, p: f.p, c: f.c, f: f.f, s: f.s });
+    flashPlus(el);
+    toast(`Added ${f.name}`);
+  }
+  else if (a === "edit-food") { ns.editId = el.dataset.id; ns.view = "food-edit"; renderAddSheet(); }
+  else if (a === "save-food") {
+    const f = lib.find(x => x.id === ns.editId);
+    if (!f) return;
+    const name = document.getElementById("efName").value.trim();
+    const vals = ["efCal", "efP", "efC", "efF", "efS"].map(readNum);
+    if (!name) { toast("Name the food"); return; }
+    if (vals.some(v => Number.isNaN(v)) || vals[0] == null) { toast("Enter calories (no negatives)"); return; }
+    Object.assign(f, { name, serving: document.getElementById("efServ").value.trim(), cal: r1(vals[0]), p: r1(vals[1]), c: r1(vals[2]), f: r1(vals[3]), s: r1(vals[4]) });
+    saveState();
+    toast(`Saved ${name}`);
+    ns.view = "tabs"; ns.tab = "library";
+    renderAddSheet();
+  }
+  else if (a === "del-food") {
+    const f = lib.find(x => x.id === ns.editId);
+    if (!f || !confirm(`Delete "${f.name}" from your library?\n\nLogged days and saved meals keep their own copy.`)) return;
+    state.nutrition.library = lib.filter(x => x.id !== f.id);
+    saveState();
+    toast(`Deleted ${f.name}`);
+    ns.view = "tabs"; ns.tab = "library";
+    renderAddSheet();
+  }
+  else if (a === "new-meal") openMealBuilder(null);
+  else if (a === "edit-meal") openMealBuilder(el.dataset.id);
+  else if (a === "mb-inc") mbStep(el.dataset.key, 1);
+  else if (a === "mb-dec") mbStep(el.dataset.key, -1);
+  else if (a === "save-meal") {
+    const d = ns.draft, name = String(d.name || "").trim(), items = draftItems();
+    if (!name) { toast("Name the meal first"); return; }
+    if (!items.length) { toast("Add at least one food"); return; }
+    const existing = d.id ? state.nutrition.meals.find(m => m.id === d.id) : null;
+    if (existing) { existing.name = name; existing.items = items; }
+    else state.nutrition.meals.push({ id: nutUid(), name, items, lastUsed: Date.now() });
+    saveState();
+    toast(`Saved "${name}"`);
+    ns.view = "tabs"; ns.tab = "meals"; nutLastTab = "meals";
+    renderAddSheet();
+  }
+  else if (a === "del-meal") {
+    const m = state.nutrition.meals.find(x => x.id === ns.draft.id);
+    if (!m || !confirm(`Delete the meal "${m.name}"?\n\nDays you've already logged keep it.`)) return;
+    state.nutrition.meals = state.nutrition.meals.filter(x => x.id !== m.id);
+    saveState();
+    toast(`Deleted ${m.name}`);
+    ns.view = "tabs"; ns.tab = "meals";
+    renderAddSheet();
+  }
+  else if (a === "add-meal") {
+    const m = state.nutrition.meals.find(x => x.id === el.dataset.id);
+    if (!m) return;
+    m.lastUsed = Date.now();
+    logEntry(ns.section, { kind: "meal", name: m.name, serving: "", ...mealTotals(m), components: m.items.map(i => ({ name: i.name, qty: i.qty, serving: i.serving })) });
+    flashPlus(el);
+    toast(`Added ${m.name}`);
+  }
+  else if (a === "search") nutSearch();
+  else if (a === "lookup") lookupBarcode(ns.barcode);
+  else if (a === "scan") startScanner();
+  else if (a === "scan-stop") stopScanner();
+  else if (a === "pick") { const p = (ns.results || [])[Number(el.dataset.i)]; if (p) openPortion(p); }
+  else if (a === "grams") {
+    ns.grams = Number(el.dataset.g);
+    const inp = document.querySelector('#nutSheetBody [data-sinput="grams"]');
+    if (inp) inp.value = ns.grams;
+    document.getElementById("pvMacros").innerHTML = macroGridHtml(portionCalc());
+  }
+  else if (a === "add-product") {
+    const g = Number(ns.grams);
+    if (!(g > 0)) { toast("Enter a portion in grams"); return; }
+    const p = ns.product, v = portionCalc();
+    const name = p.brand && !p.name.toLowerCase().includes(p.brand.toLowerCase()) ? `${p.name} (${p.brand})` : p.name;
+    const serving = `${r1(g)} g`;
+    if (document.getElementById("pvSave").checked) {
+      const lf = upsertLibraryFood({ name, serving, cal: r1(v.cal), p: r1(v.p), c: r1(v.c), f: r1(v.f), s: r1(v.s), source: "off", barcode: p.code || "" });
+      lf.lastUsed = Date.now();
+    }
+    logEntry(ns.section, { kind: "food", name, serving, ...v });
+    toast(`Added ${name}`);
+    ns.view = "tabs"; ns.tab = "search"; ns.product = null;
+    renderAddSheet();
+  }
+  else if (a === "add-manual") {
+    const name = document.getElementById("mfName").value.trim();
+    const vals = ["mfCal", "mfP", "mfC", "mfF", "mfS"].map(readNum);
+    if (!name) { toast("Name the food"); return; }
+    if (vals[0] == null) { toast("Enter calories"); return; }
+    if (vals.some(v => Number.isNaN(v))) { toast("Numbers only — no negatives"); return; }
+    const food = { name, serving: document.getElementById("mfServ").value.trim(), cal: r1(vals[0]), p: r1(vals[1]), c: r1(vals[2]), f: r1(vals[3]), s: r1(vals[4]), source: "manual" };
+    const lf = upsertLibraryFood(food);
+    lf.lastUsed = Date.now();
+    logEntry(ns.section, { kind: "food", ...food });
+    toast(`Added ${name} · saved to library`);
+    ["mfName", "mfServ", "mfCal", "mfP", "mfC", "mfF", "mfS"].forEach(id => { document.getElementById(id).value = ""; });
+  }
+  else if (a === "q-inc") setEntryQty((Number(ns.qty) || 0) + 0.5);
+  else if (a === "q-dec") setEntryQty(Math.max(0.25, (Number(ns.qty) || 0) - 0.5));
+  else if (a === "entry-save") {
+    const e = currentEntry();
+    if (!e) { closeNutSheet(); return; }
+    if (!(ns.qty > 0)) { toast("Servings must be above 0 — or tap Delete"); return; }
+    e.qty = ns.qty;
+    saveState();
+    closeNutSheet();
+    renderNutrition();
+    toast("Entry updated");
+  }
+  else if (a === "entry-del") {
+    const sec = ns.section, id = ns.entryId;
+    closeNutSheet();
+    deleteEntry(sec, id);
+  }
+  else if (a === "goal-reset") saveGoal(ns.kind === "cal" ? currentPhase().def : NUT_PROTEIN_DEFAULT);
+  else if (a === "goal-save") saveGoal(document.getElementById("goalVal").value);
+}
+
+// ---------- sheet: typing ----------
+function onNutSheetInput(ev) {
+  const el = ev.target;
+  const k = el.dataset && el.dataset.sinput;
+  if (!k) return;
+  if (k === "filter") {
+    const q = el.value.trim().toLowerCase();
+    document.querySelectorAll("#nutSheetBody [data-name]").forEach(r => { r.style.display = !q || r.dataset.name.includes(q) ? "" : "none"; });
+  }
+  else if (k === "q") ns.query = el.value;
+  else if (k === "barcode") ns.barcode = el.value;
+  else if (k === "grams") { ns.grams = parseFloat(el.value) || 0; const m = document.getElementById("pvMacros"); if (m) m.innerHTML = macroGridHtml(portionCalc()); }
+  else if (k === "mealname") ns.draft.name = el.value;
+  else if (k === "qty") { ns.qty = parseFloat(el.value) || 0; const m = document.getElementById("eqMacros"); if (m) m.innerHTML = entryMacrosHtml(); }
+}
+function onNutSheetKey(ev) {
+  if (ev.key !== "Enter") return;
+  const k = ev.target.dataset && ev.target.dataset.sinput;
+  if (k === "q") { ev.preventDefault(); nutSearch(); }
+  else if (k === "barcode") { ev.preventDefault(); lookupBarcode(ev.target.value); }
+  else if (ev.target.id === "goalVal") { ev.preventDefault(); saveGoal(ev.target.value); }
+}
+
+// Wire once — both containers are re-rendered via innerHTML, so delegate.
+(function initNutrition() {
+  const cont = document.getElementById("nutritionContent");
+  cont.addEventListener("click", onNutritionClick);
+  cont.addEventListener("touchstart", onNutTouchStart, { passive: true });
+  cont.addEventListener("touchmove", onNutTouchMove, { passive: false });
+  cont.addEventListener("touchend", onNutTouchEnd);
+  cont.addEventListener("touchcancel", onNutTouchEnd);
+  const body = document.getElementById("nutSheetBody");
+  body.addEventListener("click", onNutSheetClick);
+  body.addEventListener("input", onNutSheetInput);
+  body.addEventListener("keydown", onNutSheetKey);
+})();
 
 // ============================================================================
 // NAVIGATION
@@ -4751,10 +6055,57 @@ function switchView(view) {
   if (view === "history") { historyFocus = null; renderHistory(); }
   if (view === "daily") renderDaily();
   if (view === "run") renderRun();
-  if (view === "data") renderData();
+  if (view === "nutrition") renderNutrition();
 
   window.scrollTo(0, 0);
 }
+
+// Re-render the visible tab in place (no scroll reset) after data changes made
+// from the ⋮ panel, which can now be opened on top of any tab.
+function refreshActiveView() {
+  if (activeView === "today") renderToday();
+  else if (activeView === "history") renderHistory();
+  else if (activeView === "daily") renderDaily();
+  else if (activeView === "run") renderRun();
+  else if (activeView === "nutrition") renderNutrition();
+}
+
+// ============================================================================
+// SHEETS — shared overlay used by the ⋮ Settings & Data panel and Nutrition.
+// Bottom sheet on phones, centred modal on wider screens.
+// ============================================================================
+function openOverlay(el) {
+  el.classList.add("show");
+  el.setAttribute("aria-hidden", "false");
+  document.body.classList.add("sheet-open");
+}
+function closeOverlay(el) {
+  if (!el) return;
+  el.classList.remove("show");
+  el.setAttribute("aria-hidden", "true");
+  if (!document.querySelector(".sheet-overlay.show")) document.body.classList.remove("sheet-open");
+}
+function closeAnyOverlay(el) {
+  if (el && el.id === "nutSheet") closeNutSheet();
+  else closeOverlay(el);
+}
+function openSettings() {
+  renderData();
+  openOverlay(document.getElementById("settingsPanel"));
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-settings]")) { openSettings(); return; }
+  const closeBtn = e.target.closest("[data-close-sheet]");
+  if (closeBtn) { closeAnyOverlay(closeBtn.closest(".sheet-overlay")); return; }
+  // Tap on the dimmed backdrop (not the sheet itself) closes it
+  if (e.target.classList && e.target.classList.contains("sheet-overlay")) closeAnyOverlay(e.target);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  const open = [...document.querySelectorAll(".sheet-overlay.show")].pop();
+  if (open) closeAnyOverlay(open);
+});
 
 document.querySelectorAll(".nav-item").forEach(item => {
   item.addEventListener("click", () => switchView(item.dataset.view));
