@@ -10,7 +10,7 @@
 <title>Lift Log</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -1567,8 +1567,265 @@
   .scan-wrap { margin: 10px 0 4px; }
   #nutScanner { width: 100%; border-radius: 12px; overflow: hidden; background: #000; min-height: 220px; }
   #nutScanner video { border-radius: 12px; }
+
+  /* ======================================================================
+     FORGE THEME (V-1.32) — heated steel. Ember gradient on warm dark metal,
+     condensed scoreboard numerals, motion that answers your taps.
+     Appended last so it restyles the app without rewriting the rules above.
+     ====================================================================== */
+  :root {
+    --bg: #0b0908; --bg-elev: #14110f; --surface: #1a1613; --surface-2: #261f1a;
+    --border: #2d2620; --border-strong: #46392f;
+    --text: #f8f4ef; --text-dim: #ada296; --text-muted: #786c61;
+    --accent: #ff9d1a; --accent-dim: #9a5a10;
+    --ember-a: #ff4d1c; --ember-b: #ff8a1f; --ember-c: #ffc24a;
+    --ember: linear-gradient(135deg, var(--ember-a) 0%, var(--ember-b) 48%, var(--ember-c) 100%);
+    --glow: rgba(255,116,31,0.45);
+    --display: 'Big Shoulders Display', 'Instrument Sans', -apple-system, sans-serif;
+  }
+  html { touch-action: manipulation; }
+  body { background: var(--bg); padding-bottom: calc(98px + var(--safe-bottom)); }
+  body::before {
+    content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      radial-gradient(900px 460px at 50% -150px, rgba(255,122,31,0.17), transparent 70%),
+      radial-gradient(620px 420px at 105% 104%, rgba(255,77,28,0.09), transparent 70%),
+      repeating-linear-gradient(115deg, rgba(255,255,255,0.013) 0 2px, transparent 2px 7px);
+  }
+  :focus-visible { outline: 2px solid var(--ember-c); outline-offset: 2px; }
+  input:focus-visible, textarea:focus-visible, select:focus-visible { outline: none; }
+
+  /* ---- header ---- */
+  .header { padding: 6px 0 18px; gap: 10px; }
+  .header h1 {
+    font-family: var(--display); font-size: 31px; font-weight: 800; letter-spacing: 0.035em; line-height: 1;
+    background: var(--ember); -webkit-background-clip: text; background-clip: text;
+    color: transparent; -webkit-text-fill-color: transparent; white-space: nowrap;
+  }
+  .header .date {
+    font-size: 10.5px; color: var(--text-dim); letter-spacing: 0.07em;
+    background: rgba(255,255,255,0.045); border: 1px solid var(--border);
+    padding: 5px 10px; border-radius: 20px;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0;
+  }
+  .header .date:empty { display: none; }
+  .kebab, .sheet-close { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.09); border-radius: 12px; }
+
+  /* ---- surfaces ---- */
+  .card, .list-item, .plyo-box, .stat {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 46%), var(--surface);
+    border: 1px solid rgba(255,255,255,0.075);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 16px 30px -24px rgba(0,0,0,0.95);
+  }
+  .card { border-radius: 18px; }
+  .exercise, .readiness-badge {
+    background: linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.012) 46%), var(--surface);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.055), 0 16px 30px -24px rgba(0,0,0,0.95);
+  }
+  .exercise { border-radius: 18px; }
+  .run-rec-card {
+    background: linear-gradient(135deg, rgba(255,138,31,0.16), rgba(255,138,31,0.02) 62%), var(--surface);
+    border-color: rgba(255,138,31,0.34);
+  }
+  .card-title {
+    font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: 0.14em; color: var(--text-dim);
+  }
+  .stat { border-radius: 14px; }
+  .stat-value, .rank-card .rank-value, .vol-banner .vol-number, .nt-num b, .nt-m .val,
+  .pv-macros .v, .rest-band .rb-elapsed, .nt-ring-c b {
+    font-family: var(--display); font-variant-numeric: tabular-nums; letter-spacing: 0.01em;
+  }
+  .stat-value { font-size: 26px; font-weight: 800; }
+
+  /* ---- buttons ---- */
+  .btn {
+    background: var(--ember); color: #1d0d02; font-weight: 700; border-radius: 14px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 12px 24px -12px var(--glow);
+    transition: transform .07s ease, filter .15s ease, box-shadow .15s ease;
+  }
+  .btn:active { transform: scale(0.975); filter: brightness(0.93); }
+  .btn:disabled { opacity: 0.4; box-shadow: none; }
+  .btn-outline { background: rgba(255,255,255,0.02); color: var(--text); border: 1px solid var(--border-strong); box-shadow: none; }
+  .btn-ghost { background: rgba(255,255,255,0.065); color: var(--text); border: 1px solid rgba(255,255,255,0.06); box-shadow: none; }
+  .btn-danger { background: linear-gradient(135deg, #dc2626, #f87171); color: #fff; box-shadow: inset 0 1px 0 rgba(255,255,255,0.25), 0 12px 24px -12px rgba(239,68,68,0.75); }
+  .btn-success { background: linear-gradient(135deg, #059669, #34d399); color: #00180d; box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 12px 24px -12px rgba(16,185,129,0.7); }
+  .btn-xs { border-radius: 10px; }
+  .ns-danger { color: var(--danger); }
+  @media (hover: hover) { .btn:hover { filter: brightness(1.06); } }
+
+  /* ---- inputs ---- */
+  .set-input, .bw-input, .rir-select, .nut-input, .ex-notes-input, .variant-select, .run-alt-select, textarea {
+    background-color: rgba(0,0,0,0.34); border-color: var(--border);
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  .set-input, .rir-select { border-radius: 11px; }
+  .set-input:focus, .bw-input:focus, .rir-select:focus, .nut-input:focus, .ex-notes-input:focus, textarea:focus, .variant-select:focus {
+    border-color: var(--ember-b); box-shadow: 0 0 0 3px rgba(255,138,31,0.18); outline: none;
+  }
+
+  /* ---- lift tab ---- */
+  .day-picker { gap: 7px; }
+  .day-pill {
+    font-family: var(--display); font-size: 14px; font-weight: 700; letter-spacing: 0.06em;
+    padding: 11px 2px; border-radius: 12px; background: rgba(255,255,255,0.035); border-color: rgba(255,255,255,0.08);
+    transition: transform .07s ease;
+  }
+  .day-pill { white-space: nowrap; font-size: 13.5px; letter-spacing: 0.03em; }
+  .day-pill:active { transform: scale(0.95); }
+  .pdf-btn-row .btn { white-space: nowrap; font-size: 14.5px; padding-left: 8px; padding-right: 8px; }
+  .day-pill.active { background: var(--ember); color: #1d0d02; border-color: transparent; box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 10px 20px -10px var(--glow); }
+  .exercise.current {
+    box-shadow: 0 0 0 1px rgba(255,138,31,0.6), 0 0 36px -10px var(--glow), inset 0 1px 0 rgba(255,255,255,0.06);
+  }
+  .exercise.done { opacity: 0.6; }
+  .ex-icon {
+    border-radius: 13px; border-color: rgba(255,138,31,0.26);
+    background: radial-gradient(circle at 30% 18%, rgba(255,138,31,0.2), rgba(0,0,0,0.35) 75%);
+  }
+  .ex-suggest {
+    background: linear-gradient(90deg, rgba(255,138,31,0.16), rgba(255,138,31,0.04)); border-color: rgba(255,138,31,0.32); border-radius: 11px;
+  }
+  .ex-progress { gap: 5px; }
+  .ex-progress-bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,0.08); }
+  .ex-progress-bar.done { background: linear-gradient(90deg, #059669, #34d399); box-shadow: 0 0 10px -2px rgba(52,211,153,0.7); }
+  .ex-progress-bar.current { background: var(--ember); box-shadow: 0 0 12px -1px var(--glow); animation: emberPulse 1.8s ease-in-out infinite; }
+  .log-btn {
+    background: var(--ember); border-radius: 11px; width: 40px;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 8px 16px -8px var(--glow); transition: transform .08s ease;
+  }
+  .log-btn:active { transform: scale(0.88); }
+  .log-btn.logged { background: linear-gradient(135deg, #059669, #34d399); box-shadow: inset 0 1px 0 rgba(255,255,255,0.3), 0 8px 16px -8px rgba(16,185,129,0.7); }
+  .log-btn.pop { animation: pop .36s cubic-bezier(.3,1.7,.5,1); }
+  .stretch-check { border-radius: 7px; }
+  .stretch-item.checked .stretch-check { background: var(--ember); border-color: transparent; box-shadow: 0 0 12px -2px var(--glow); animation: pop .3s cubic-bezier(.3,1.7,.5,1); }
+  .stretch-item.checked .stretch-label { color: var(--text-dim); }
+  .rest-band { border-radius: 13px; padding: 10px 16px; }
+  .rest-band .rb-elapsed { font-size: 30px; font-weight: 800; }
+  .rest-band.rb-green { box-shadow: 0 0 26px -8px rgba(16,185,129,0.75); }
+  .pr-badge { background: var(--ember); border-radius: 6px; }
+  .run-type.active, .chart-tab.active {
+    background: var(--ember); color: #1d0d02; border-color: transparent;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 10px 20px -12px var(--glow);
+  }
+  .phase-btn.active, .ns-tab.active {
+    background: linear-gradient(180deg, rgba(255,138,31,0.22), rgba(255,138,31,0.06)); border-color: rgba(255,138,31,0.7); color: #ffb85c;
+    box-shadow: 0 0 22px -10px var(--glow);
+  }
+  .welcome h2 { font-family: var(--display); font-size: 34px; font-weight: 800; letter-spacing: 0.03em; }
+
+  /* ---- history ---- */
+  .vol-banner { border-radius: 20px; padding: 20px 22px; }
+  .vol-banner::before {
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, rgba(255,255,255,0.22) 50%, transparent 62%);
+    transform: translateX(-120%);
+  }
+  .view.enter .vol-banner::before { animation: sheen 1.25s ease .25s 1; }
+  .vol-banner .vol-number { font-size: clamp(42px, 13vw, 58px); font-weight: 900; line-height: 1; }
+  .vol-banner .vol-number b { font-weight: inherit; }
+  .rank-grid { gap: 8px; }
+  .rank-card { border-radius: 15px; }
+  .rank-card .rank-value { font-size: 29px; font-weight: 800; }
+  .rank-card .rank-name { font-family: var(--display); font-size: 12.5px; letter-spacing: 0.09em; }
+  .rir-chip { border-radius: 8px; }
+
+  /* ---- nutrition ---- */
+  .nt-hero { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+  .nt-ring { position: relative; width: 122px; height: 122px; flex-shrink: 0; }
+  .nt-ring svg { width: 100%; height: 100%; transform: rotate(-90deg); overflow: visible; }
+  .nt-ring circle { fill: none; stroke-width: 11; }
+  .nt-ring .track { stroke: rgba(255,255,255,0.07); }
+  .nt-ring .prog { stroke: url(#ntGrad); stroke-linecap: round; stroke-dashoffset: var(--off); filter: drop-shadow(0 0 7px rgba(255,138,31,0.55)); }
+  .nt-ring.ok .prog   { stroke: var(--success); filter: drop-shadow(0 0 7px rgba(16,185,129,0.6)); }
+  .nt-ring.warn .prog { stroke: var(--warn); }
+  .nt-ring.over .prog { stroke: var(--danger); filter: drop-shadow(0 0 7px rgba(239,68,68,0.6)); }
+  .view.enter .nt-ring .prog { animation: ringIn 1s cubic-bezier(.2,.8,.2,1) both; }
+  .nt-ring-c { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .nt-ring-c b { font-size: 34px; font-weight: 800; line-height: 1; }
+  .nt-ring-c span { font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); margin-top: 3px; }
+  .nt-side { flex: 1; min-width: 0; }
+  .nt-side .nt-row { flex-wrap: wrap; }
+  .nt-side .nt-num { margin-top: 2px; }
+  .nt-side .nt-num b { font-size: 24px; font-weight: 800; }
+  .nt-left { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+  .nt-left.ok { color: #34d399; } .nt-left.over { color: #f87171; } .nt-left.warn { color: #fcd34d; }
+  .nt-bar { height: 9px; border-radius: 6px; background: rgba(0,0,0,0.35); }
+  .nt-fill { background: var(--ember); box-shadow: 0 0 10px -2px var(--glow); }
+  .nt-fill.pro { background: linear-gradient(90deg, #3b82f6, #7dd3fc); box-shadow: 0 0 10px -2px rgba(96,165,250,0.7); }
+  .nt-fill.ok { background: linear-gradient(90deg, #059669, #34d399); box-shadow: 0 0 10px -2px rgba(52,211,153,0.7); }
+  .nt-m .val { font-size: 24px; font-weight: 800; }
+  .nt-m .mbar div { background: linear-gradient(90deg, #7d7268, #c9bdb0); }
+  .nt-goal { color: #ffb85c; }
+  .nut-dnav { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.09); border-radius: 12px; }
+  .nut-dword { font-family: var(--display); font-size: 21px; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; }
+  .ns-plus { background: var(--ember); box-shadow: inset 0 1px 0 rgba(255,255,255,0.38), 0 8px 16px -8px var(--glow); border-radius: 12px; }
+  .ns-plus.added { background: linear-gradient(135deg, #059669, #34d399); animation: pop .36s cubic-bezier(.3,1.7,.5,1); }
+  .ni-meal { background: var(--ember); }
+  .swipe-fg { background: #1c1815; }
+
+  /* ---- floating nav ---- */
+  .nav {
+    left: 12px; right: 12px; bottom: calc(10px + var(--safe-bottom));
+    max-width: 456px; margin: 0 auto; padding: 6px;
+    border: 1px solid rgba(255,255,255,0.1); border-radius: 26px;
+    background: rgba(24,20,17,0.8);
+    -webkit-backdrop-filter: blur(22px) saturate(150%); backdrop-filter: blur(22px) saturate(150%);
+    box-shadow: 0 20px 40px -14px rgba(0,0,0,0.9), inset 0 1px 0 rgba(255,255,255,0.07);
+  }
+  .nav-item { border-radius: 20px; padding: 8px 2px 7px; transition: color .2s ease, background-color .2s ease; }
+  .nav-item:active .nav-icon { transform: scale(0.88); }
+  .nav-icon { transition: transform .18s cubic-bezier(.3,1.6,.5,1), filter .2s ease; }
+  .nav-item.active {
+    color: #ffb14a;
+    background: radial-gradient(130% 110% at 50% 0%, rgba(255,138,31,0.26), rgba(255,138,31,0.05) 72%);
+    box-shadow: inset 0 0 0 1px rgba(255,138,31,0.24);
+  }
+  .nav-item.active .nav-icon { transform: translateY(-1px) scale(1.06); filter: drop-shadow(0 0 7px rgba(255,138,31,0.75)); }
+  .nav-label { font-size: 9.5px; letter-spacing: 0.07em; }
+  .toast {
+    bottom: calc(100px + var(--safe-bottom)); border-radius: 26px; padding: 11px 18px;
+    background: rgba(34,28,23,0.94); border-color: rgba(255,138,31,0.35);
+    -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px);
+    box-shadow: 0 14px 30px -12px rgba(0,0,0,0.9), 0 0 24px -12px var(--glow);
+    max-width: calc(100vw - 40px);
+  }
+
+  /* ---- sheets ---- */
+  .sheet { background: linear-gradient(180deg, #1b1714, #131010 38%); border-color: rgba(255,255,255,0.11); border-radius: 24px 24px 0 0; }
+  .sheet-title { font-family: var(--display); font-size: 19px; font-weight: 800; letter-spacing: 0.08em; }
+  @media (max-width: 699px) {
+    .sheet::before { content: ""; display: block; width: 40px; height: 4px; border-radius: 3px; background: rgba(255,255,255,0.2); margin: 8px auto -4px; flex-shrink: 0; }
+  }
+  @media (min-width: 700px) { .sheet { border-radius: 24px; } }
+  @media (min-width: 900px) { .app { max-width: 560px; } .nav { max-width: 536px; } }
+  .app { overflow-x: clip; }
+  @media (max-width: 359px) { .day-pill { font-size: 12px; letter-spacing: 0; } .header h1 { font-size: 26px; } .header .date { font-size: 9.5px; padding: 4px 7px; letter-spacing: 0.03em; } .nt-ring { width: 104px; height: 104px; } .nt-ring-c b { font-size: 28px; } }
+
+  /* ---- motion ---- */
+  .view.enter > div:not(.header) > * { animation: rise .46s cubic-bezier(.2,.8,.2,1) both; }
+  .view.enter > div:not(.header) > *:nth-child(2) { animation-delay: .05s; }
+  .view.enter > div:not(.header) > *:nth-child(3) { animation-delay: .1s; }
+  .view.enter > div:not(.header) > *:nth-child(4) { animation-delay: .15s; }
+  .view.enter > div:not(.header) > *:nth-child(5) { animation-delay: .2s; }
+  .view.enter > div:not(.header) > *:nth-child(n+6) { animation-delay: .25s; }
+  .confetti { position: fixed; inset: 0; z-index: 180; pointer-events: none; overflow: hidden; }
+  .confetti i { position: absolute; top: 30%; border-radius: 2px; opacity: 0; animation: confetti 1.9s cubic-bezier(.15,.7,.3,1) forwards; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @keyframes pop { 0% { transform: scale(0.7); } 60% { transform: scale(1.14); } 100% { transform: scale(1); } }
+  @keyframes emberPulse { 0%, 100% { filter: brightness(1); } 50% { filter: brightness(1.35); } }
+  @keyframes sheen { to { transform: translateX(120%); } }
+  @keyframes ringIn { from { stroke-dashoffset: 314.16; } }
+  @keyframes confetti {
+    0% { opacity: 1; transform: translate(0, 0) rotate(0) scale(0.6); }
+    22% { opacity: 1; transform: translate(calc(var(--dx) * 0.55), -14vh) rotate(calc(var(--r) * 0.3)) scale(1); }
+    100% { opacity: 0; transform: translate(var(--dx), var(--dy)) rotate(var(--r)) scale(0.9); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  }
 </style>
 </head>
+
 <body>
 
 <!-- ============ LIFT VIEW ============ -->
@@ -1716,9 +1973,9 @@ const PLAN = {
       { name: "Romanian Deadlift", sets: 2, repsLow: 8, repsHigh: 10, restSec: 120, isCompound: true, rirHint: "Hamstring stretch focus", notes: "DB or BB. Slow stretch on the eccentric." },
       { name: "Leg Extension", sets: 2, repsLow: 12, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "RIR 0 last set", notes: "Pause 1s at top." },
       { name: "Seated Leg Curl", sets: 3, repsLow: 10, repsHigh: 12, restSec: 90, isCompound: false, rirHint: "RIR 1", notes: "Hamstring isolation." },
-      { name: "Seated Calf Raise", sets: 2, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Slow eccentric (3s)", notes: "Soleus — bent knee." },
-      { name: "Band Work \u2014 Hips & Running Support", sets: 4, repsLow: 12, repsHigh: 20, restSec: 90, isCompound: false, rirHint: "Burn, not failure", notes: "Sets 1\u20132: Banded Lateral Walk \u2014 band above the knees, quarter-squat, 12\u201320 steps each direction. Sets 3\u20134: Banded Clamshell \u2014 12\u201320 per side, pause at the top. Log band resistance in the weight box, or leave it blank." }
-    ]
+      { name: "Seated Calf Raise", sets: 2, repsLow: 10, repsHigh: 15, restSec: 90, isCompound: false, rirHint: "Slow eccentric (3s)", notes: "Soleus — bent knee." }
+    ],
+    hasBands: true
   },
   pushB: {
     name: "Push B",
@@ -1868,6 +2125,13 @@ const CORE = [
   "Weighted Russian Twist (2 × 12/side) — rotation; hold a DB or plate, controlled tempo",
   "Plank (1 × max time) — anti-extension; hold to failure, add a plate on your back to progress"
 ];
+// Leg-day band work for hips + running support — a checklist, not a logged lift.
+const BANDS = [
+  "Banded Lateral Walk · set 1 — band above the knees, quarter-squat, 12–20 steps each way",
+  "Banded Lateral Walk · set 2",
+  "Banded Clamshell · set 1 — 12–20 per side, pause at the top",
+  "Banded Clamshell · set 2"
+];
 // Thursday (Push B) swaps the Russian Twist for the Dragon Flag.
 const CORE_B = [
   "Hanging Leg Raise (3 × 8–12) — anti-extension; hold a DB between the feet to load",
@@ -1975,6 +2239,7 @@ function loadState() {
     if (merged.current) {
       if (!merged.current.stretches) merged.current.stretches = {};
       if (!merged.current.core) merged.current.core = {};
+      if (!merged.current.bands) merged.current.bands = {};
       if (merged.current.addons == null) merged.current.addons = "";
       (merged.current.exercises || []).forEach(ex => {
         if (!ex.dropSet) ex.dropSet = { weight: null, reps: null, rir: null, logged: false };
@@ -2405,7 +2670,7 @@ function renderVolumeBanner() {
   return `
     <div class="vol-banner ${cls}">
       <div class="vol-label">Total Weight Lifted · All Time</div>
-      <div class="vol-number">${v.toLocaleString()} <span>lb</span></div>
+      <div class="vol-number"><b id="volNum" data-to="${Math.round(v)}" data-final="${v.toLocaleString()}">${v.toLocaleString()}</b> <span>lb</span></div>
       <div class="vol-sub">${sub}</div>
     </div>
   `;
@@ -2663,7 +2928,8 @@ function startWorkout(dayKey) {
     date: new Date().toISOString(),
     exercises,
     stretches: {},       // { stretchName: true } for checked items
-    core: {},            // { coreName: true } for checked items (Wed/Fri only)
+    core: {},            // { coreName: true } for checked items
+    bands: {},           // { bandItem: true } for checked band work (leg day)
     addons: "",          // free text for ad-hoc extra lifts
     startedAt: Date.now(),
     completedAt: null
@@ -2699,7 +2965,22 @@ function completeWorkout() {
   showWorkoutSummary(w);
 }
 
+function celebrate() {
+  if (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const host = document.createElement("div");
+  host.className = "confetti";
+  const colors = ["#ff4d1c", "#ff8a1f", "#ffc24a", "#34d399", "#f8f4ef"];
+  for (let i = 0; i < 40; i++) {
+    const p = document.createElement("i");
+    p.style.cssText = `left:${50 + (Math.random() * 50 - 25)}%;background:${colors[i % colors.length]};--dx:${((Math.random() * 2 - 1) * 46).toFixed(1)}vw;--dy:${(38 + Math.random() * 46).toFixed(1)}vh;--r:${Math.round((Math.random() * 2 - 1) * 720)}deg;animation-delay:${(Math.random() * 0.14).toFixed(2)}s;width:${(6 + Math.random() * 5).toFixed(0)}px;height:${(8 + Math.random() * 8).toFixed(0)}px;`;
+    host.appendChild(p);
+  }
+  document.body.appendChild(host);
+  setTimeout(() => host.remove(), 2400);
+}
+
 function showWorkoutSummary(w) {
+  setTimeout(celebrate, 180);
   const totalSets = w.exercises.reduce((sum, ex) => sum + ex.sets.filter(s => s.logged).length, 0);
   const totalVolume = w.exercises.reduce((sum, ex) =>
     sum + ex.sets.filter(s => s.logged).reduce((s2, set) => s2 + (set.weight * set.reps), 0), 0);
@@ -2912,7 +3193,7 @@ function renderDayPicker(cont) {
       <div class="day-picker">
         ${DAY_KEYS.map(k => `
           <button class="day-pill ${k === recommended ? 'recommended' : ''}" data-day="${k}">
-            ${PLAN[k].name.replace("Push ", "P-").replace("Pull ", "Pl-").replace("Legs", "Legs")}
+            ${PLAN[k].name}
             ${k === recommended ? '<span class="recommended-dot"></span>' : ''}
           </button>
         `).join("")}
@@ -2979,7 +3260,7 @@ function renderDayPreview(dayKey) {
         </div>
         `;
       }).join("")}
-      ${day.hasCore ? `<div class="small accent-text" style="margin-top: 10px;">+ Core work (4 exercises) &amp; full stretch routine included</div>` : `<div class="small" style="margin-top: 10px;">+ Full stretch routine included</div>`}
+      ${day.hasCore ? `<div class="small accent-text" style="margin-top: 10px;">+ Core work (4 exercises) &amp; full stretch routine included</div>` : day.hasBands ? `<div class="small accent-text" style="margin-top: 10px;">+ Band work (4 sets) &amp; full stretch routine included</div>` : `<div class="small" style="margin-top: 10px;">+ Full stretch routine included</div>`}
       <div class="tier-legend">
         <span><span class="dot" style="background:#16a34a;"></span>Long rest</span>
         <span><span class="dot" style="background:#d99318;"></span>Medium</span>
@@ -3023,6 +3304,27 @@ function renderActiveWorkout(cont) {
     </div>
 
     ${w.exercises.map((ex, i) => renderExerciseCard(ex, i, i === currentIdx)).join("")}
+
+    ${PLAN[w.dayKey] && PLAN[w.dayKey].hasBands ? `
+      <div class="card">
+        <details class="sect-collapse" open>
+          <summary>
+            <span class="card-title" style="margin:0;">Band Work <span style="color: var(--text-dim); letter-spacing: 0; text-transform: none; font-weight: 500;">· hips &amp; running support · <span id="bandCount">${BANDS.filter(b => w.bands && w.bands[b]).length}</span>/${BANDS.length}</span></span>
+            <span class="sect-chev">▾</span>
+          </summary>
+        <div class="small" style="margin:8px 0 10px;">Tap each set as you finish it. Burn, not failure.</div>
+        <div class="stretches-list">
+          ${BANDS.map((b, i) => `
+            <label class="stretch-item ${w.bands && w.bands[b] ? 'checked' : ''}" data-band="${i}">
+              <input type="checkbox" ${w.bands && w.bands[b] ? 'checked' : ''}>
+              <span class="stretch-check"></span>
+              <span class="stretch-label">${b}</span>
+            </label>
+          `).join("")}
+        </div>
+        </details>
+      </div>
+    ` : ""}
 
     ${PLAN[w.dayKey] && PLAN[w.dayKey].hasCore ? `
       <div class="card">
@@ -3089,6 +3391,7 @@ function renderActiveWorkout(cont) {
   tickRestClock();
   wireStretchListeners();
   wireCoreListeners();
+  wireBandListeners();
   wireAddonsListener();
 
   // Auto-scroll to current exercise (or the just-completed one, so its drop-set row is visible)
@@ -3142,6 +3445,23 @@ function wireStretchListeners() {
       }
       const tgl = document.getElementById("stretchToggleAll");
       if (tgl) tgl.textContent = STRETCHES.every(s => state.current.stretches[s]) ? "Clear all" : "Check all";
+      saveState();
+    });
+  });
+}
+
+function wireBandListeners() {
+  document.querySelectorAll("[data-band]").forEach(label => {
+    label.addEventListener("click", (e) => {
+      e.preventDefault();
+      const name = BANDS[parseInt(label.dataset.band)];
+      if (!state.current.bands) state.current.bands = {};
+      const on = !state.current.bands[name];
+      if (on) { state.current.bands[name] = true; vibrate(20); } else delete state.current.bands[name];
+      label.classList.toggle("checked", on);
+      label.querySelector("input").checked = on;
+      const cnt = document.getElementById("bandCount");
+      if (cnt) cnt.textContent = BANDS.filter(b => state.current.bands[b]).length;
       saveState();
     });
   });
@@ -3364,7 +3684,7 @@ function wireExerciseListeners() {
 
       logSet(exIdx, sIdx, weight, reps, rir);
       wInput.value = weight;
-      btn.classList.add("logged");
+      btn.classList.add("logged", "pop");
       btn.textContent = "✓";
       row.classList.add("logged");
       vibrate(40);
@@ -3416,7 +3736,7 @@ function wireExerciseListeners() {
       }
       justCompletedExIdx = null;   // collapse this card and advance to the next exercise
       saveState();
-      btn.classList.add("logged");
+      btn.classList.add("logged", "pop");
       btn.textContent = "✓";
       row.classList.add("logged");
       vibrate(40);
@@ -4031,6 +4351,7 @@ function renderExerciseDetail(cont) {
 }
 
 function drawChart(sessions) {
+  if (typeof Chart === "undefined") return;   // offline: skip the chart, keep the tab working
   const canvas = document.getElementById("exChart");
   if (!canvas) return;
   if (chartInstance) chartInstance.destroy();
@@ -4111,6 +4432,7 @@ function getWeightSeries() {
 }
 
 function drawWeightChart(series) {
+  if (typeof Chart === "undefined") return;   // offline: skip the chart, keep the tab working
   const canvas = document.getElementById("bwChart");
   if (!canvas) return;
   if (bwChart) bwChart.destroy();
@@ -4467,6 +4789,7 @@ function parseFloatOrNull(v) {
 }
 
 function drawRunVolumeChart() {
+  if (typeof Chart === "undefined") return;   // offline: skip the chart, keep the tab working
   const canvas = document.getElementById("runVolChart");
   if (!canvas) return;
   if (dailyCharts.runvol) dailyCharts.runvol.destroy();
@@ -4531,6 +4854,7 @@ function drawRunVolumeChart() {
 }
 
 function drawDailyChart(canvasId, list, field, label, color, instKey) {
+  if (typeof Chart === "undefined") return;   // offline: skip the chart, keep the tab working
   const filtered = list.filter(c => c[field] != null);
   if (filtered.length < 2) return;
   const canvas = document.getElementById(canvasId);
@@ -4859,7 +5183,7 @@ function renderData() {
     </div>
 
     <div style="text-align: center; padding: 20px; color: var(--text-muted); font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;">
-      Lift Log · V-1.31
+      Lift Log · V-1.32
     </div>
   `;
 
@@ -5224,19 +5548,27 @@ function renderNutrition() {
         <button class="nut-dnav" data-act="day-next" aria-label="Next day" ${isToday ? "disabled" : ""}>›</button>
       </div>
 
-      <div class="nt-row">
-        <div class="nt-label">Calories</div>
-        <div class="nt-num mono"><b>${nutFmt(t.cal)}</b> / <button class="nt-goal" data-act="edit-cal" aria-label="Edit calorie goal">${nutFmt(goal)}</button> kcal</div>
+      <div class="nt-hero">
+        <div class="nt-ring ${calCls}">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs><linearGradient id="ntGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff4d1c"/><stop offset="0.5" stop-color="#ff8a1f"/><stop offset="1" stop-color="#ffc24a"/></linearGradient></defs>
+            <circle class="track" cx="60" cy="60" r="50"/>
+            <circle class="prog" cx="60" cy="60" r="50" stroke-dasharray="314.16" style="--off:${(314.16 * (1 - Math.min(1, calPct))).toFixed(1)}"/>
+          </svg>
+          <div class="nt-ring-c"><b>${nutFmt(t.cal)}</b><span>kcal</span></div>
+        </div>
+        <div class="nt-side">
+          <div class="nt-label">Calories</div>
+          <div class="nt-num mono">of <button class="nt-goal" data-act="edit-cal" aria-label="Edit calorie goal">${nutFmt(goal)}</button> kcal</div>
+          <div class="nt-left ${calCls}">${calLeft >= 0 ? nutFmt(calLeft) + " left" : nutFmt(-calLeft) + " over"} · ${ph.label}</div>
+          <div class="nt-row" style="margin-top: 12px;">
+            <div class="nt-label">Protein</div>
+            <div class="nt-num mono"><b>${nutFmt(t.p)}</b> / <button class="nt-goal" data-act="edit-pro" aria-label="Edit protein goal">${nutFmt(pro)}</button> g</div>
+          </div>
+          <div class="nt-bar"><div class="nt-fill ${proCls}" style="width:${Math.min(100, pro ? t.p / pro * 100 : 0).toFixed(1)}%"></div></div>
+          <div class="nt-sub" style="margin-bottom: 0;">${proLeft > 0 ? proLeft + " g to go" : "Protein target hit ✓"}</div>
+        </div>
       </div>
-      <div class="nt-bar"><div class="nt-fill ${calCls}" style="width:${Math.min(100, calPct * 100).toFixed(1)}%"></div></div>
-      <div class="nt-sub">${calLeft >= 0 ? nutFmt(calLeft) + " kcal left" : nutFmt(-calLeft) + " kcal over"} · ${ph.label}</div>
-
-      <div class="nt-row">
-        <div class="nt-label">Protein</div>
-        <div class="nt-num mono"><b>${nutFmt(t.p)}</b> / <button class="nt-goal" data-act="edit-pro" aria-label="Edit protein goal">${nutFmt(pro)}</button> g</div>
-      </div>
-      <div class="nt-bar"><div class="nt-fill ${proCls}" style="width:${Math.min(100, pro ? t.p / pro * 100 : 0).toFixed(1)}%"></div></div>
-      <div class="nt-sub">${proLeft > 0 ? proLeft + " g to go" : "Protein target hit ✓"}</div>
 
       <div class="nt-macros">
         ${macro("Carbs", t.c, rec.c, "~")}
@@ -6058,6 +6390,34 @@ function switchView(view) {
   if (view === "nutrition") renderNutrition();
 
   window.scrollTo(0, 0);
+  playEnter(view);
+}
+
+// One orchestrated entrance per tab switch (cards rise in sequence). Re-renders
+// inside a tab don't replay it. Skipped when the phone asks for reduced motion.
+function playEnter(view) {
+  const el = document.getElementById("view-" + view);
+  if (!el) return;
+  el.classList.remove("enter");
+  void el.offsetWidth;
+  el.classList.add("enter");
+  clearTimeout(el._enterT);
+  el._enterT = setTimeout(() => el.classList.remove("enter"), 1100);
+  if (view === "history") countUpVolume();
+}
+function countUpVolume() {
+  const el = document.getElementById("volNum");
+  if (!el) return;
+  const to = Number(el.dataset.to) || 0;
+  if (!to || (window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches)) return;
+  const t0 = performance.now(), dur = 950, from = Math.round(to * 0.9);
+  const step = (now) => {
+    if (!el.isConnected) return;
+    const k = Math.min(1, (now - t0) / dur), e = 1 - Math.pow(1 - k, 3);
+    el.textContent = k < 1 ? Math.round(from + (to - from) * e).toLocaleString() : el.dataset.final;
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
 }
 
 // Re-render the visible tab in place (no scroll reset) after data changes made
@@ -6128,14 +6488,10 @@ if (navigator.storage && navigator.storage.persist) {
 }
 
 renderToday();
+playEnter("today");
 
-// Prevent zoom on iOS double-tap
-let lastTouch = 0;
-document.addEventListener("touchend", (e) => {
-  const now = Date.now();
-  if (now - lastTouch <= 300) e.preventDefault();
-  lastTouch = now;
-}, { passive: false });
+// Double-tap zoom is disabled in CSS (touch-action: manipulation), so quick
+// consecutive taps are no longer swallowed.
 </script>
 </body>
 </html>
